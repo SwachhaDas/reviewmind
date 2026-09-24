@@ -278,15 +278,22 @@ function ReviewPage() {
     return 'bg-gray-100 text-gray-600'
   }
 
+  // ═══════════════════════════════════════════════
+  // Source badge — supports all 4 sources
+  // ═══════════════════════════════════════════════
   const sourceColor = (source) => {
-    if (source === 'semantic_scholar') return 'bg-blue-100 text-blue-800'
+    if (source === 'arxiv') return 'bg-red-100 text-red-800'
+    if (source === 'crossref') return 'bg-emerald-100 text-emerald-800'
     if (source === 'openalex') return 'bg-purple-100 text-purple-800'
+    if (source === 'semantic_scholar') return 'bg-blue-100 text-blue-800'
     return 'bg-gray-100 text-gray-600'
   }
 
   const sourceLabel = (source) => {
-    if (source === 'semantic_scholar') return 'SS'
+    if (source === 'arxiv') return 'arXiv'
+    if (source === 'crossref') return 'CR'
     if (source === 'openalex') return 'OA'
+    if (source === 'semantic_scholar') return 'SS'
     return '—'
   }
 

@@ -8,9 +8,11 @@ Returns paper data enriched with verification fields:
   - doi, url, verification_url
   - fetched_at: ISO timestamp
   - venue: journal/conference name (with multiple fallbacks)
+
+NOTE: This is now a BONUS source. arXiv + Crossref are PRIMARY.
+Skips immediately on 429 (rate limit) — no retries, no waits.
 """
 import os
-import time
 import requests
 from datetime import datetime
 
@@ -19,6 +21,8 @@ def search_openalex(keyword, year_min=2000, year_max=2030, limit=10):
     """
     Search papers via OpenAlex API.
     Returns list of paper dicts with verification metadata.
+
+    Fast-fail design: no retries, no waits. On 429, returns [] immediately.
     """
     url = "https://api.openalex.org/works"
     contact_email = os.getenv("OPENALEX_CONTACT_EMAIL", "research@example.com")
@@ -31,31 +35,28 @@ def search_openalex(keyword, year_min=2000, year_max=2030, limit=10):
         "mailto": contact_email,
     }
 
-    max_retries = 4
+    # ✂️ Fast-fail: no retries, no waits. Skip on 429.
     data = {"results": []}
     fetch_time = datetime.utcnow().isoformat() + "Z"
 
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, params=params, timeout=10)
+    try:
+        response = requests.get(url, params=params, timeout=10)
 
-            if response.status_code == 200:
-                data = response.json()
-                break
+        if response.status_code == 429:
+            print("[openalex] Rate limited (429) — SKIPPING (no wait)")
+            return []
 
-            if response.status_code == 429:
-                wait = 5 * (attempt + 1)
-                print(f"[openalex] Rate limit. Waiting {wait}s...")
-                time.sleep(wait)
-                continue
+        if response.status_code != 200:
+            print(f"[openalex] Error: {response.status_code} — skipping")
+            return []
 
-            print(f"[openalex] Error: {response.status_code}")
-            break
-        except Exception as e:
-            print(f"[openalex] Exception: {e}")
-            time.sleep(3)
+        data = response.json()
 
-    # Build full API endpoint URL
+    except Exception as e:
+        print(f"[openalex] Exception: {e} — skipping")
+        return []
+
+    # Build full API endpoint URL for verification
     full_endpoint = (
         f"{url}?search={keyword}&per-page={limit}"
         f"&filter=year:{year_min}-{year_max}"

@@ -1,5 +1,14 @@
 """
-PDF Upload & Text Paste Handler.
+PDF Upload & Text Paste Handler — Fast version.
+
+Speed optimizations:
+  1. PyMuPDF first — if good text found, skip other extractors entirely.
+     (Was: 4 extractors always run → 17s wasted.)
+  2. Regex section detection runs first. AI only called if regex
+     found fewer than 3 sections. (Was: AI always called → 3-5s.)
+  3. Title extracted from text first. AI only as fallback.
+     (Was: AI always called → 2-3s.)
+  4. OCR only triggers on genuinely scanned PDFs.
 
 Simplified detection:
   - research_paper → point-wise sections (Abstract, Introduction, etc.)
@@ -15,16 +24,15 @@ import re
 import json
 
 import fitz  # PyMuPDF
-import pdfplumber
 import google.generativeai as genai
-from pypdf import PdfReader
 from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 
 from app.services.gemini_client import _api_key, _MODEL_NAME
 
+
 # ─────────────────────────────────────────────────────────────
-# Tesseract OCR setup
+# Optional imports — OCR (only loaded if available)
 # ─────────────────────────────────────────────────────────────
 try:
     import pytesseract
@@ -39,6 +47,22 @@ try:
 except Exception as e:
     print(f"[upload] OCR not available: {e}")
     OCR_AVAILABLE = False
+
+
+# ─────────────────────────────────────────────────────────────
+# Optional imports — pypdf, pdfplumber (only used as fallbacks)
+# ─────────────────────────────────────────────────────────────
+try:
+    from pypdf import PdfReader
+    HAVE_PYPDF = True
+except ImportError:
+    HAVE_PYPDF = False
+
+try:
+    import pdfplumber
+    HAVE_PDFPLUMBER = True
+except ImportError:
+    HAVE_PDFPLUMBER = False
 
 
 router = APIRouter()
@@ -68,6 +92,7 @@ def clean_text(text: str) -> str:
 
 
 def is_text_good(text: str) -> bool:
+    """Check if extracted text is genuine (not garbled)."""
     if not text or len(text) < 100:
         return False
     words = re.findall(r"\b[a-zA-Z\u0980-\u09FF]{2,}\b", text)
@@ -109,6 +134,7 @@ def clean_title(raw_title: str) -> str:
 # ═════════════════════════════════════════════════════════════
 
 def extract_with_pymupdf(contents: bytes) -> str:
+    """Primary extractor — fastest (PyMuPDF)."""
     try:
         doc = fitz.open(stream=contents, filetype="pdf")
         parts = [page.get_text("text") for page in doc if page.get_text("text")]
@@ -120,6 +146,9 @@ def extract_with_pymupdf(contents: bytes) -> str:
 
 
 def extract_with_pypdf(contents: bytes) -> str:
+    """Fallback extractor 1."""
+    if not HAVE_PYPDF:
+        return ""
     try:
         reader = PdfReader(io.BytesIO(contents))
         parts = [(page.extract_text() or "") for page in reader.pages]
@@ -130,6 +159,9 @@ def extract_with_pypdf(contents: bytes) -> str:
 
 
 def extract_with_pdfplumber(contents: bytes, layout: bool = False) -> str:
+    """Fallback extractor 2 (slower but handles some edge cases)."""
+    if not HAVE_PDFPLUMBER:
+        return ""
     try:
         with pdfplumber.open(io.BytesIO(contents)) as pdf:
             parts = []
@@ -144,6 +176,7 @@ def extract_with_pdfplumber(contents: bytes, layout: bool = False) -> str:
 
 
 def extract_with_ocr(contents: bytes) -> str:
+    """OCR for scanned PDFs only (slow — last resort)."""
     if not OCR_AVAILABLE:
         return ""
     try:
@@ -164,46 +197,62 @@ def extract_with_ocr(contents: bytes) -> str:
         return ""
 
 
+def extract_best_text(contents: bytes) -> tuple:
+    """
+    Smart extraction with priority:
+      1. Try PyMuPDF (fast). If good → STOP.
+      2. Only on failure: try pypdf, then pdfplumber.
+      3. Only if all fail AND text is garbled: use OCR.
+
+    Returns (best_name, best_text).
+    """
+    # ─── FAST PATH: PyMuPDF only ───
+    text = extract_with_pymupdf(contents)
+    if is_text_good(text):
+        return ("pymupdf", text)
+
+    # ─── SLOW PATH: Fallback chain (PyMuPDF failed) ───
+    print("[extract] PyMuPDF failed — trying fallbacks...")
+
+    for name, extractor in [
+        ("pypdf", extract_with_pypdf),
+        ("pdfplumber", lambda c: extract_with_pdfplumber(c, False)),
+    ]:
+        text = extractor(contents)
+        if is_text_good(text):
+            print(f"[extract] {name} succeeded")
+            return (name, text)
+
+    # ─── LAST RESORT: OCR (scanned PDF) ───
+    if OCR_AVAILABLE:
+        print("[extract] All extractors failed — trying OCR...")
+        ocr_text = extract_with_ocr(contents)
+        if is_text_good(ocr_text):
+            return ("ocr", ocr_text)
+
+    # Return whatever we have
+    return ("failed", text or "")
+
+
 # ═════════════════════════════════════════════════════════════
-# CONTENT TYPE — SIMPLIFIED (research paper vs not)
+# CONTENT TYPE — research paper vs not
 # ═════════════════════════════════════════════════════════════
 
 def detect_content_type(text: str) -> str:
-    """
-    Simplified detection:
-      - 'research_paper' if paper-like keywords present
-      - 'other' otherwise
-    """
+    """'research_paper' if paper keywords present, else 'other'."""
     if not text or len(text.strip()) < 100:
         return "other"
 
-    # Sample first 8000 chars for detection
     sample = text[:8000].lower()
-
-    # Research paper keywords — strong indicators
     paper_keywords = [
-        "abstract",
-        "introduction",
-        "methodology",
-        "method",
-        "results",
-        "findings",
-        "discussion",
-        "conclusion",
-        "references",
-        "et al",
-        "doi",
-        "this paper",
-        "this study",
-        "we propose",
-        "we present",
-        "our approach",
-        "our method",
+        "abstract", "introduction", "methodology", "method",
+        "results", "findings", "discussion", "conclusion",
+        "references", "et al", "doi", "this paper", "this study",
+        "we propose", "we present", "our approach", "our method",
     ]
 
     count = sum(1 for kw in paper_keywords if kw in sample)
 
-    # 2 or more paper keywords → research paper
     if count >= 2:
         print(f"[content-type] research_paper (keywords found: {count})")
         return "research_paper"
@@ -213,7 +262,7 @@ def detect_content_type(text: str) -> str:
 
 
 # ═════════════════════════════════════════════════════════════
-# REGEX-BASED SECTION DETECTION
+# REGEX-BASED SECTION DETECTION (fast — no AI)
 # ═════════════════════════════════════════════════════════════
 
 SECTION_PATTERNS = {
@@ -278,7 +327,7 @@ def detect_sections_regex(text: str) -> dict:
 
 
 # ═════════════════════════════════════════════════════════════
-# AI-BASED SECTION DETECTION
+# AI-BASED SECTION DETECTION (only if regex fails)
 # ═════════════════════════════════════════════════════════════
 
 def detect_sections_ai(text: str) -> dict:
@@ -292,29 +341,21 @@ def detect_sections_ai(text: str) -> dict:
         prompt = f"""You are analyzing a research paper to extract its sections.
 
 Map section names to the closest standard category:
-
-1. **title** — The paper's main title only
-2. **abstract** — Summary paragraph
-3. **introduction** — Background, motivation
-4. **methodology** — Methods, approach, model architecture
-5. **findings** — Results, evaluation, experiments
-6. **limitations** — Challenges, constraints
-7. **conclusion** — Conclusion, summary, discussion
+1. title, 2. abstract, 3. introduction, 4. methodology,
+5. findings, 6. limitations, 7. conclusion
 
 For EACH section, provide the EXACT first 15 words as an anchor.
 For sections that DON'T exist, return empty string "".
 
-IMPORTANT: Respond with valid JSON only.
-
 Respond with JSON ONLY:
 {{
-  "title": "first 15 words of title only",
-  "abstract": "first 15 words of abstract",
-  "introduction": "first 15 words of introduction",
-  "methodology": "first 15 words of methodology",
-  "findings": "first 15 words of findings",
-  "limitations": "first 15 words of limitations",
-  "conclusion": "first 15 words of conclusion"
+  "title": "...",
+  "abstract": "...",
+  "introduction": "...",
+  "methodology": "...",
+  "findings": "...",
+  "limitations": "...",
+  "conclusion": "..."
 }}
 
 PAPER SAMPLE:
@@ -332,22 +373,8 @@ PAPER SAMPLE:
         if match:
             raw = match.group(0)
 
-        result = json.loads(raw)
-        return result
+        return json.loads(raw)
 
-    except json.JSONDecodeError as e:
-        print(f"[ai-detect] JSON parse failed: {e}")
-        try:
-            salvaged = {}
-            for key in ["title", "abstract", "introduction", "methodology",
-                        "findings", "limitations", "conclusion"]:
-                m = re.search(rf'"{key}"\s*:\s*"([^"]*)"', raw)
-                if m:
-                    salvaged[key] = m.group(1)
-            return salvaged
-        except Exception:
-            pass
-        return {}
     except Exception as e:
         print(f"[ai-detect] Failed: {e}")
         return {}
@@ -366,21 +393,39 @@ def extract_section_from_anchor(full_text: str, anchor: str,
     if pos < 0:
         pos = full_clean.lower().find(" ".join(anchor_clean.split()[:6]).lower())
     if pos < 0:
-        pos = full_clean.lower().find(" ".join(anchor_clean.split()[:4]).lower())
-
-    if pos < 0:
         return ""
     return full_clean[pos:pos + max_length]
 
 
 # ═════════════════════════════════════════════════════════════
-# AI TITLE GENERATION
+# TITLE GENERATION — Fast (regex first, AI fallback)
 # ═════════════════════════════════════════════════════════════
 
 def generate_content_title(text: str, lang: str = "en") -> str:
+    """
+    Extract title from text.
+    Fast path: first meaningful line from text (instant).
+    Slow path: AI (only if fast path fails).
+    """
     if not text or not text.strip():
         return "Untitled Text"
 
+    # ─── FAST PATH: extract first meaningful line ───
+    lines = text.strip().split("\n")[:15]
+    for line in lines:
+        s = line.strip()
+        if (
+            15 < len(s) < 150
+            and "@" not in s
+            and not s.startswith("http")
+            and not s.lower().startswith(("abstract", "introduction", "keywords"))
+            and not re.match(r"^\d+$", s)
+        ):
+            cleaned = re.sub(r"\s+", " ", s)[:80].strip()
+            if cleaned:
+                return cleaned
+
+    # ─── SLOW PATH: AI (only if fast path fails) ───
     if _api_key:
         try:
             model = genai.GenerativeModel(_MODEL_NAME)
@@ -392,11 +437,6 @@ def generate_content_title(text: str, lang: str = "en") -> str:
             prompt = f"""Generate a SHORT title (3-6 words, max 40 characters) for the content below.
 
 The title should be descriptive. Do NOT include quotes.
-
-Examples:
-- React useEffect Guide
-- Machine Learning Basics
-- Transformer Architecture
 
 CONTENT (first 1500 chars):
 {text[:1500]}
@@ -413,19 +453,22 @@ Respond with ONLY the title text, nothing else."""
         except Exception as e:
             print(f"[title] AI failed: {e}")
 
+    # ─── Fallback: first 6 words ───
     words = text.strip().split()[:6]
     title = " ".join(words)[:50]
     return title if title else "Untitled Text"
 
 
 # ═════════════════════════════════════════════════════════════
-# SECTION EXTRACTION — Research Paper only
+# SECTION EXTRACTION — Full pipeline
 # ═════════════════════════════════════════════════════════════
 
 def detect_all_sections(text: str, content_type: str = "other") -> dict:
     """
     If research_paper: extract 6 academic sections.
     Otherwise: return full_text only.
+
+    Speed: regex first, AI only if regex finds < 3 sections.
     """
     final = {
         "full_text": text,
@@ -440,21 +483,29 @@ def detect_all_sections(text: str, content_type: str = "other") -> dict:
         "key_points": [],
     }
 
-    # ─── Not a research paper: just full text ───
+    # ─── Not a research paper: fast path ───
     if content_type != "research_paper":
         print(f"[sections] Content '{content_type}' — full text only")
         final["title"] = generate_content_title(text)
-        final["abstract"] = text[:1500]  # short preview only
+        final["abstract"] = text[:1500]
         return final
 
-    # ─── Research paper: extract point-wise sections ───
+    # ─── Research paper: regex first ───
     print("[sections] Research paper — extracting sections")
-
     regex_sections = detect_sections_regex(text)
-    ai_anchors = detect_sections_ai(text)
 
-    for section in ["title", "abstract", "introduction",
-                    "methodology", "findings", "limitations", "conclusion"]:
+    section_keys = ["abstract", "introduction", "methodology",
+                    "findings", "limitations", "conclusion"]
+    regex_found = sum(1 for k in section_keys if regex_sections.get(k))
+
+    if regex_found < 3:
+        print(f"[sections] Regex found only {regex_found} sections — using AI")
+        ai_anchors = detect_sections_ai(text)
+    else:
+        print(f"[sections] Regex found {regex_found} sections — skipping AI")
+        ai_anchors = {}
+
+    for section in ["title"] + section_keys:
         if ai_anchors.get(section):
             if section == "title":
                 final["title"] = clean_title(ai_anchors[section])
@@ -469,7 +520,6 @@ def detect_all_sections(text: str, content_type: str = "other") -> dict:
             else:
                 final[section] = regex_sections[section]
 
-    # Fallbacks
     if not final["conclusion"]:
         for keyword in ["conclusion", "conclusions", "discussion", "summary"]:
             match = re.search(rf"\b{keyword}\b", text, re.IGNORECASE)
@@ -499,7 +549,7 @@ def detect_all_sections(text: str, content_type: str = "other") -> dict:
 
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
-    """Upload PDF and extract content."""
+    """Upload PDF and extract content (fast version)."""
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         return {"status": "error", "message": "Only PDF files are supported"}
 
@@ -508,34 +558,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         print(f"\n[upload] === Received: {file.filename} "
               f"({len(contents) / 1024:.1f} KB) ===")
 
-        candidates = []
-        for name, extractor in [
-            ("pymupdf", extract_with_pymupdf),
-            ("pypdf", extract_with_pypdf),
-            ("pdfplumber-layout", lambda c: extract_with_pdfplumber(c, True)),
-            ("pdfplumber", lambda c: extract_with_pdfplumber(c, False)),
-        ]:
-            text = extractor(contents)
-            if text:
-                candidates.append((name, text))
-
-        best_name, best_text, best_score = "", "", -1
-        for name, txt in candidates:
-            words = re.findall(r"\b[a-zA-Z\u0980-\u09FF]{2,}\b", txt)
-            if not words:
-                continue
-            short = len([w for w in words if 2 <= len(w) <= 12])
-            long = len([w for w in words if len(w) > 15])
-            score = short - long * 3
-            if score > best_score:
-                best_score = score
-                best_name = name
-                best_text = txt
-
-        if not is_text_good(best_text) and OCR_AVAILABLE:
-            ocr_text = extract_with_ocr(contents)
-            if is_text_good(ocr_text):
-                best_name, best_text = "ocr", ocr_text
+        best_name, best_text = extract_best_text(contents)
 
         if not best_text:
             return {"status": "error", "message": "No text could be extracted."}
@@ -573,7 +596,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
 @router.post("/upload/paste")
 async def paste_text(req: PasteRequest):
-    """Process pasted text."""
+    """Process pasted text (fast version)."""
     text = (req.text or "").strip()
     if not text:
         return {"status": "error", "message": "Empty text"}

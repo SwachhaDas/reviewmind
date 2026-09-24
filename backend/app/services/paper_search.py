@@ -1,21 +1,28 @@
 """
-Paper Search — sync version with OpenAlex retry + S2 rate-limit tracking.
+Paper Search — multi-source fallback chain.
 
-Fixes:
-  - OpenAlex gets retry with exponential backoff (2s/4s/8s) on 504/timeout.
-  - Semantic Scholar rate limit is tracked in-memory. Once blocked, we skip
-    the call entirely instead of wasting 10+20+30+40 = 100s waiting.
-  - Query expansion (ML → machine learning) preserved.
+Priority (fastest + most reliable first):
+  1. arXiv       (no rate limit, always works, ~3s)
+  2. Crossref    (generous limit, polite pool, ~2s)
+  3. OpenAlex    (bonus — skip-on-429, no wait)
+  4. Semantic Scholar (bonus — skip-on-429, no wait)
+
+Design:
+  - Fast sources first (arXiv + Crossref usually return 15-20 papers total)
+  - If we already have enough papers, skip slower sources entirely
+  - Any source failure → skip, never block the pipeline
+  - Query expansion (ML → machine learning) preserved
+  - Dedup by DOI or title
 """
 import json
 import os
-import time
 
-from app.services.semantic_scholar import search_semantic_scholar
+from app.services.arxiv_client import search_arxiv
+from app.services.crossref_client import search_crossref
 
 
 # ─────────────────────────────────────────────────────────────
-# Abbreviation expansion (unchanged)
+# Abbreviation expansion
 # ─────────────────────────────────────────────────────────────
 
 _ABBREV_FILE = os.path.join(
@@ -76,101 +83,114 @@ def _expand_query(keyword: str) -> str:
 
 
 # ─────────────────────────────────────────────────────────────
-# Semantic Scholar rate-limit tracking (in-memory)
+# Dedup helper — cross-source key
 # ─────────────────────────────────────────────────────────────
 
-# Track when S2 becomes rate-limited. Once set, skip S2 calls until
-# this timestamp passes — no more 100s wait cycles.
-_S2_BLOCKED_UNTIL = 0.0
-_S2_BLOCK_DURATION = 300  # 5 minutes
+def _dedup_key(paper):
+    """Stable dedup key across sources."""
+    doi = (paper.get("doi") or "").strip().lower()
+    if doi:
+        return f"doi:{doi}"
+    title = (paper.get("title") or "").strip().lower()[:60]
+    return f"title:{title}"
 
 
 # ─────────────────────────────────────────────────────────────
-# Main search
+# Main search — multi-source fallback chain
 # ─────────────────────────────────────────────────────────────
 
 def search_papers(keyword, year_min=2000, year_max=2030, limit=10):
     """
-    OpenAlex-first search with retry. Falls back to Semantic Scholar
-    only if OpenAlex fails, and only if S2 is not rate-limited.
+    Multi-source search: arXiv → Crossref → OpenAlex → Semantic Scholar.
 
-    No more 100s waits — S2 rate-limit state is remembered.
+    Fast sources first. If we already have enough unique papers, skip
+    slower ones. Any source failure is skipped (never blocks the pipeline).
     """
-    global _S2_BLOCKED_UNTIL
-
     expanded_keyword = _expand_query(keyword)
     if expanded_keyword != keyword:
         print(f"[search] Query expanded: '{keyword}' → '{expanded_keyword}'")
     else:
         print(f"[search] Query: '{keyword}'")
 
-    # ═══════════════════════════════════════════════
-    # PRIMARY: OpenAlex with retry
-    # ═══════════════════════════════════════════════
+    seen_keys = set()
+    all_papers = []
+
+    def _add_papers(new_papers):
+        """Add new papers, dedup by DOI/title. Returns count added."""
+        added = 0
+        for p in new_papers or []:
+            key = _dedup_key(p)
+            if key and key not in seen_keys:
+                seen_keys.add(key)
+                all_papers.append(p)
+                added += 1
+        return added
+
+    # ═══════════════════════════════════════════════════════
+    # SOURCE 1: arXiv (fast, no rate limit)
+    # ═══════════════════════════════════════════════════════
+    try:
+        arxiv_papers = search_arxiv(
+            expanded_keyword, year_min, year_max, limit
+        )
+        added = _add_papers(arxiv_papers)
+        print(f"[search] arXiv: {added} unique papers added")
+    except Exception as e:
+        print(f"[search] arXiv failed: {str(e)[:120]}")
+
+    # Early exit if we already have enough
+    if len(all_papers) >= limit:
+        print(f"[search] ✅ Have enough papers ({len(all_papers)}) — skipping other sources")
+        return all_papers[:limit]
+
+    # ═══════════════════════════════════════════════════════
+    # SOURCE 2: Crossref (fast, generous limit)
+    # ═══════════════════════════════════════════════════════
+    try:
+        remaining = limit - len(all_papers)
+        crossref_papers = search_crossref(
+            expanded_keyword, year_min, year_max, remaining
+        )
+        added = _add_papers(crossref_papers)
+        print(f"[search] Crossref: {added} unique papers added")
+    except Exception as e:
+        print(f"[search] Crossref failed: {str(e)[:120]}")
+
+    if len(all_papers) >= limit:
+        print(f"[search] ✅ Have enough papers ({len(all_papers)}) — skipping other sources")
+        return all_papers[:limit]
+
+    # ═══════════════════════════════════════════════════════
+    # SOURCE 3: OpenAlex (bonus — skip-on-429, no wait)
+    # ═══════════════════════════════════════════════════════
     try:
         from app.services.openalex_client import search_openalex
-    except ImportError as e:
-        print(f"[search] Cannot import openalex_client: {e}")
-        return _try_semantic_scholar(expanded_keyword, year_min, year_max, limit)
-
-    # Retry with delays: 0s (first try), 2s, 4s, 8s
-    delays = [0, 2, 4, 8]
-    for attempt, delay in enumerate(delays):
-        if delay > 0:
-            print(f"[search] OpenAlex retry in {delay}s "
-                  f"(attempt {attempt + 1}/{len(delays)})...")
-            time.sleep(delay)
-
-        try:
-            papers = search_openalex(
-                expanded_keyword, year_min, year_max, limit
-            )
-            if papers and len(papers) > 0:
-                print(f"[search] OpenAlex: {len(papers)} papers found")
-                return papers
-            print(f"[search] OpenAlex returned 0 papers "
-                  f"(attempt {attempt + 1}/{len(delays)})")
-
-        except Exception as e:
-            err = str(e)[:120]
-            print(f"[search] OpenAlex error (attempt {attempt + 1}): {err}")
-
-    # ═══════════════════════════════════════════════
-    # FALLBACK: Semantic Scholar (skip if rate-limited)
-    # ═══════════════════════════════════════════════
-    return _try_semantic_scholar(
-        expanded_keyword, year_min, year_max, limit
-    )
-
-
-def _try_semantic_scholar(keyword, year_min, year_max, limit):
-    """Semantic Scholar fallback — skips if we're already rate-limited."""
-    global _S2_BLOCKED_UNTIL
-
-    now = time.time()
-    if now < _S2_BLOCKED_UNTIL:
-        remaining = int(_S2_BLOCKED_UNTIL - now)
-        print(f"[search] Semantic Scholar known rate-limited — "
-              f"skipping call, unblocks in {remaining}s")
-        return []
-
-    try:
-        papers = search_semantic_scholar(
-            keyword, year_min, year_max, limit
+        remaining = limit - len(all_papers)
+        openalex_papers = search_openalex(
+            expanded_keyword, year_min, year_max, remaining
         )
-        if papers and len(papers) > 0:
-            print(f"[search] Semantic Scholar: {len(papers)} papers found")
-            return papers
-        print("[search] Semantic Scholar returned 0 papers")
+        added = _add_papers(openalex_papers)
+        print(f"[search] OpenAlex: {added} unique papers added")
     except Exception as e:
-        err = str(e)
-        if "429" in err or "rate" in err.lower():
-            _S2_BLOCKED_UNTIL = time.time() + _S2_BLOCK_DURATION
-            print(f"[search] Semantic Scholar rate-limited (429). "
-                  f"Blocking for {_S2_BLOCK_DURATION}s — no wait, "
-                  f"future calls skipped.")
-        else:
-            print(f"[search] Semantic Scholar failed: {err[:120]}")
+        print(f"[search] OpenAlex failed: {str(e)[:120]}")
 
-    print("[search] Both APIs failed — returning empty list")
-    return []
+    if len(all_papers) >= limit:
+        print(f"[search] ✅ Have enough papers ({len(all_papers)}) — skipping Semantic Scholar")
+        return all_papers[:limit]
+
+    # ═══════════════════════════════════════════════════════
+    # SOURCE 4: Semantic Scholar (last bonus — skip-on-429)
+    # ═══════════════════════════════════════════════════════
+    try:
+        from app.services.semantic_scholar import search_semantic_scholar
+        remaining = limit - len(all_papers)
+        s2_papers = search_semantic_scholar(
+            expanded_keyword, year_min, year_max, remaining
+        )
+        added = _add_papers(s2_papers)
+        print(f"[search] Semantic Scholar: {added} unique papers added")
+    except Exception as e:
+        print(f"[search] Semantic Scholar failed: {str(e)[:120]}")
+
+    print(f"[search] ✅ Total: {len(all_papers)} unique papers from all sources")
+    return all_papers[:limit]

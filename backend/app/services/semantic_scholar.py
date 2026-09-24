@@ -7,9 +7,11 @@ Returns paper data enriched with verification fields:
   - semantic_scholar_id: paper ID
   - doi, url, verification_url
   - fetched_at: ISO timestamp
+
+NOTE: This is now a BONUS source. arXiv + Crossref + OpenAlex are primary.
+Skips immediately on 429 (rate limit) — no retries, no waits.
 """
 import os
-import time
 import requests
 from datetime import datetime
 
@@ -18,6 +20,8 @@ def search_semantic_scholar(keyword, year_min=2000, year_max=2030, limit=10):
     """
     Search papers via Semantic Scholar API.
     Returns list of paper dicts with full verification metadata.
+
+    Fast-fail design: no retries, no waits. On 429, returns [] immediately.
     """
     url = "https://api.semanticscholar.org/graph/v1/paper/search"
     params = {
@@ -32,29 +36,26 @@ def search_semantic_scholar(keyword, year_min=2000, year_max=2030, limit=10):
     if api_key:
         headers["x-api-key"] = api_key
 
-    max_retries = 4
+    # ✂️ Fast-fail: no retries, no waits. Skip on 429.
     data = {"data": []}
     fetch_time = datetime.utcnow().isoformat() + "Z"
 
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, params=params, headers=headers, timeout=10)
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=10)
 
-            if response.status_code == 200:
-                data = response.json()
-                break
+        if response.status_code == 429:
+            print("[semantic-scholar] Rate limited (429) — SKIPPING (no wait)")
+            return []
 
-            if response.status_code == 429:
-                wait = 10 * (attempt + 1)
-                print(f"[semantic-scholar] Rate limit. Waiting {wait}s...")
-                time.sleep(wait)
-                continue
+        if response.status_code != 200:
+            print(f"[semantic-scholar] Error: {response.status_code} — skipping")
+            return []
 
-            print(f"[semantic-scholar] Error: {response.status_code}")
-            break
-        except Exception as e:
-            print(f"[semantic-scholar] Exception: {e}")
-            time.sleep(5)
+        data = response.json()
+
+    except Exception as e:
+        print(f"[semantic-scholar] Exception: {e} — skipping")
+        return []
 
     # Build full API endpoint URL for verification
     full_endpoint = f"{url}?query={keyword}&limit={limit}&year={year_min}-{year_max}"

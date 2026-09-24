@@ -3,12 +3,13 @@ Multi-Table Word Report Generator with Full Verification and Clickable Links.
 
 Fixes applied:
   • Verification steps rendered as separate numbered paragraphs (no merge)
-  • Table 2 source column shows only "SS" or "OA" (no stray "0")
+  • Table 2 source column shows arXiv / CR / OA / SS (no stray "0")
   • Clickable hyperlinks in tables, DOI/URL fields, and references
   • Sanitized text (no debug/QA notes)
   • "Not mentioned" for missing limitations (never "—")
   • Methodology can be "Inferred: ..." for overview papers
   • Clean page breaks (no orphan pages)
+  • Sources shown: arXiv, Crossref, OpenAlex, Semantic Scholar
 """
 import os
 import re
@@ -25,6 +26,39 @@ from docx.oxml import OxmlElement
 from app.services.prisma_generator import OUTPUT_DIR
 
 
+# ─────────────────────────────────────────────────────────────
+# Display names for sources (single source of truth)
+# ─────────────────────────────────────────────────────────────
+_SOURCE_DISPLAY = {
+    "arxiv": "arXiv",
+    "crossref": "Crossref",
+    "openalex": "OpenAlex",
+    "semantic_scholar": "Semantic Scholar",
+}
+
+# Short badges for Table 2's "Source" column
+_SOURCE_SHORT = {
+    "arxiv": "arXiv",
+    "crossref": "CR",
+    "openalex": "OA",
+    "semantic_scholar": "SS",
+}
+
+
+def _display_source(source_key: str) -> str:
+    """Human-readable source name. Falls back to raw key if unknown."""
+    if not source_key:
+        return "—"
+    return _SOURCE_DISPLAY.get(source_key, source_key)
+
+
+def _short_source(source_key: str) -> str:
+    """Short badge for Table 2. Falls back to raw key if unknown."""
+    if not source_key:
+        return "—"
+    return _SOURCE_SHORT.get(source_key, source_key)
+
+
 LABELS = {
     "en": {
         "title": "Systematic Literature Review Report",
@@ -34,7 +68,8 @@ LABELS = {
         "verification_statement": "Verification Statement",
         "verification_text": (
             "This report contains data from real research papers "
-            "retrieved from verified academic APIs (Semantic Scholar, OpenAlex). "
+            "retrieved from verified academic APIs (arXiv, Crossref, "
+            "OpenAlex, Semantic Scholar). "
             "Every paper has a DOI link and verification URL for independent checking. "
             "AI-extracted data can be cross-verified against the original paper text "
             "in the appendices."
@@ -97,8 +132,8 @@ LABELS = {
         "verification_statement": "যাচাই বিবৃতি",
         "verification_text": (
             "এই রিপোর্টে থাকা তথ্য সত্যিকারের গবেষণাপত্র থেকে সংগ্রহ করা হয়েছে "
-            "(Semantic Scholar, OpenAlex)। প্রতিটি পেপারের DOI লিঙ্ক এবং "
-            "যাচাইয়ের URL আছে।"
+            "(arXiv, Crossref, OpenAlex, Semantic Scholar)। প্রতিটি পেপারের DOI লিঙ্ক "
+            "এবং যাচাইয়ের URL আছে।"
         ),
         "total_papers": "মোট পেপার",
         "sources_used": "ব্যবহৃত সোর্স",
@@ -430,13 +465,8 @@ def _get_link(paper):
 
 
 def _get_source_short(paper):
-    """Return SS or OA (no stray characters)."""
-    source = paper.get("source_api", "")
-    if source == "semantic_scholar":
-        return "SS"
-    if source == "openalex":
-        return "OA"
-    return "—"
+    """Return short source badge for Table 2 (arXiv, CR, OA, SS)."""
+    return _short_source(paper.get("source_api", ""))
 
 
 def _get_author_year(paper):
@@ -491,7 +521,12 @@ def _add_verification_log(doc, paper, index, L):
 
     # Source Verification
     _add_paragraph(doc, L["source_verification"], size=11, bold=True)
-    _add_key_value(doc, L["api_source"], paper.get("source_api", "—"), indent=0.3)
+    _add_key_value(
+        doc,
+        L["api_source"],
+        _display_source(paper.get("source_api", "")),
+        indent=0.3,
+    )
 
     api_endpoint = paper.get("api_endpoint", "—")
     if api_endpoint and api_endpoint.startswith("http"):
@@ -670,12 +705,19 @@ def generate_word_report(
     _add_heading(doc, L["verification_statement"], level=1)
     _add_paragraph(doc, L["verification_text"], size=10)
 
-    ss_count = len([p for p in papers if p.get("source_api") == "semantic_scholar"])
+    # Count papers by source (all 4 sources)
+    arxiv_count = len([p for p in papers if p.get("source_api") == "arxiv"])
+    cr_count = len([p for p in papers if p.get("source_api") == "crossref"])
     oa_count = len([p for p in papers if p.get("source_api") == "openalex"])
+    ss_count = len([p for p in papers if p.get("source_api") == "semantic_scholar"])
 
     _add_key_value(doc, L["total_papers"], len(papers))
-    _add_key_value(doc, L["sources_used"],
-                   f"Semantic Scholar: {ss_count}, OpenAlex: {oa_count}")
+    _add_key_value(
+        doc,
+        L["sources_used"],
+        f"arXiv: {arxiv_count}, Crossref: {cr_count}, "
+        f"OpenAlex: {oa_count}, Semantic Scholar: {ss_count}",
+    )
     if papers:
         _add_key_value(doc, L["fetched_time"], papers[0].get("fetched_at", "—"))
     doc.add_paragraph()
@@ -718,7 +760,7 @@ def generate_word_report(
                 _get_author_year(p),
                 p.get("year", "—"),
                 _clean_text(p.get("venue", "")) or "—",
-                _get_source_short(p),  # Returns clean "SS" or "OA"
+                _get_source_short(p),
                 _get_link(p),
             ])
         _add_table_from_rows(
@@ -845,10 +887,12 @@ def generate_word_report(
                 url = p["url"]
                 _add_hyperlink(cite_p, url, url)
 
+            # Source line — use proper display name
+            _api_display = _display_source(p.get("source_api", ""))
             src_p = doc.add_paragraph()
             src_p.paragraph_format.left_indent = Inches(0.7)
             src_run = src_p.add_run(
-                f"   Source: {p.get('source_api', '—')} | "
+                f"   Source: {_api_display} | "
                 f"Fetched: {p.get('fetched_at', '—')} | Verify: "
             )
             src_run.italic = True
