@@ -1,4 +1,14 @@
-export const API_BASE = 'http://localhost:8000/api'
+// ─────────────────────────────────────────────
+// API base URL
+// ─────────────────────────────────────────────
+// Uses Vite environment variable if provided (production build), else
+// falls back to localhost so local development works without any setup.
+const _ENV_BASE = import.meta.env.VITE_API_BASE_URL
+export const API_BASE = (_ENV_BASE && _ENV_BASE.trim()) || 'http://localhost:8000/api'
+
+// Also export the server root (without /api) so components that build
+// download URLs (e.g. presentation PPTX/PDF) can work consistently.
+export const API_SERVER = API_BASE.replace(/\/api\/?$/, '')
 
 // ─────────────────────────────────────────────
 // Presentation API endpoints
