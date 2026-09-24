@@ -8,6 +8,7 @@ import ReviewPage from './pages/ReviewPage'
 import ChatPage from './pages/ChatPage'
 import QuizPage from './pages/QuizPage'
 import PresentationPage from './pages/PresentationPage'
+import StatisticsPage from './pages/StatisticsPage'  // ← NEW
 
 function App() {
   const [showLanding, setShowLanding] = useState(true)
@@ -34,6 +35,7 @@ function App() {
           <Route path="chat" element={<ChatPage />} />
           <Route path="quiz" element={<QuizPage />} />
           <Route path="presentation" element={<PresentationPage />} />
+          <Route path="statistics" element={<StatisticsPage />} />  {/* ← NEW */}
         </Route>
       </Routes>
     </BrowserRouter>

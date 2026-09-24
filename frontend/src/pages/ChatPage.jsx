@@ -66,24 +66,27 @@ function ChatPage() {
     window.dispatchEvent(
       new CustomEvent('load-session', { detail: { sessionId } })
     )
+
+    // Auto-close the history sidebar on mobile after selection
+    if (window.innerWidth < 1024) setShowHistory(false)
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto relative">
+    <div className="px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto relative">
       {/* Header with history toggle */}
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+      <div className="mb-4 sm:mb-6 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
             💬 {t('navChat')}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
             {t('chatPageSubtitle')}
           </p>
         </div>
 
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition shadow-sm ${
+          className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border text-xs sm:text-sm font-medium transition shadow-sm ${
             showHistory
               ? 'bg-blue-500 text-white border-blue-500'
               : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600'
@@ -96,19 +99,20 @@ function ChatPage() {
         </button>
       </div>
 
-      {/* Sliding history sidebar */}
+      {/* Sliding history sidebar — full-width on mobile, fixed 24rem
+          on sm+. Close button sized for comfortable tap on touch. */}
       <div
         className={`fixed top-0 right-0 h-screen w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
           showHistory ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-          <h3 className="font-bold text-gray-800 text-sm">
+          <h3 className="font-bold text-gray-800 text-base sm:text-sm">
             📚 {t('chatHistory')}
           </h3>
           <button
             onClick={() => setShowHistory(false)}
-            className="text-gray-500 hover:text-red-500 text-lg px-2 transition font-bold"
+            className="text-gray-500 hover:text-red-500 text-2xl sm:text-lg w-10 h-10 flex items-center justify-center rounded-lg hover:bg-red-50 transition font-bold"
           >
             ✕
           </button>
@@ -133,19 +137,20 @@ function ChatPage() {
         />
       )}
 
-      {/* Main content */}
+      {/* Main content — single column on mobile (paper above chat),
+          two-panel layout on lg+ (paper left, chat right). */}
       {!paper ? (
         <div className="max-w-3xl mx-auto">
           <PaperUpload onPaperLoaded={handlePaperLoaded} />
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
           {/* Left: Paper sections */}
           <div className="lg:col-span-2">
             <div className="flex justify-end mb-2">
               <button
                 onClick={handleResetPaper}
-                className="text-xs text-gray-500 hover:text-red-600 transition"
+                className="text-xs text-gray-500 hover:text-red-600 transition py-1 px-2 rounded hover:bg-red-50"
               >
                 🔄 {t('chatChangePaper')}
               </button>

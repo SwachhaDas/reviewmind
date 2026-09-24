@@ -119,15 +119,22 @@ def generate_pdf(slides_data, output_path):
         c.setFillColor(BLUE_PRIMARY)
         c.rect(0, height - 0.15 * inch, width, 0.15 * inch, fill=1, stroke=0)
 
-        # Slide title
+        # Slide title — draw first, then anchor the accent underline
+        # directly beneath the title's real bottom edge. Using a fixed
+        # y-position caused the underline to overlap multi-line titles
+        # and appear like a strikethrough line across the text.
         title_p, th = _wrap_text(
             slide_data.get('title', ''), slide_title_style, width - 2 * inch
         )
-        title_p.drawOn(c, 0.6 * inch, height - 1.2 * inch - th)
+        title_top = height - 1.2 * inch
+        title_bottom = title_top - th
+        title_p.drawOn(c, 0.6 * inch, title_bottom)
 
-        # Accent underline
+        # Accent underline — placed below the title's actual bottom,
+        # with a small gap so it never touches descenders (g, y, p).
+        underline_y = title_bottom - 0.12 * inch
         c.setFillColor(BLUE_PRIMARY)
-        c.rect(0.6 * inch, height - 1.4 * inch, 1.5 * inch, 0.05 * inch,
+        c.rect(0.6 * inch, underline_y, 1.5 * inch, 0.05 * inch,
                fill=1, stroke=0)
 
         # Bullets
@@ -135,7 +142,9 @@ def generate_pdf(slides_data, output_path):
         if not bullets:
             bullets = [slide_data.get('content', '')]
 
-        y_pos = height - 1.9 * inch
+        # Start bullets below the underline (dynamic, not fixed), so
+        # multi-line titles push content down instead of overlapping.
+        y_pos = underline_y - 0.4 * inch
         for bullet in bullets:
             bullet_text = f"• {bullet}"
             bp, bh = _wrap_text(bullet_text, bullet_style, width - 1.5 * inch)

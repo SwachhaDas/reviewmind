@@ -79,8 +79,7 @@ function HowItWorks() {
     },
   ]
 
-  // ─── Companion Tools (Chat, Quiz, Presentation) ───
-  // Each tool has 4-5 sub-steps explaining HOW it works.
+  // Companion Tools
   const tools = [
     {
       key: 'chat',
@@ -172,7 +171,6 @@ function HowItWorks() {
     pink: 'bg-pink-100 text-pink-600 border-pink-300',
   }
 
-  // Accent styles for tool cards
   const toolAccents = {
     blue: {
       ring: 'border-blue-300 bg-blue-50/60',
@@ -197,47 +195,45 @@ function HowItWorks() {
   const currentTool = tools[activeTool]
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-3 sm:p-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">
+      <div className="text-center mb-6 sm:mb-10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">
           🎯 {t('howPageTitle') || 'How ReviewMind Works'}
         </h1>
-        <p className="text-gray-600 max-w-3xl mx-auto">
+        <p className="text-sm sm:text-base text-gray-600 max-w-3xl mx-auto">
           {t('howPageSubtitle') ||
             'ReviewMind automates the entire systematic literature review workflow — from paper search to final report — using 4 specialized AI agents. Here is the full pipeline in 7 simple steps.'}
         </p>
       </div>
 
-      {/* ═══════════════════════════════════════════════
-          SECTION 1 — Core Review Pipeline (7 steps)
-         ═══════════════════════════════════════════════ */}
+      {/* SECTION 1 — Core Review Pipeline */}
       <div className="mb-4">
-        <h2 className="text-lg font-bold text-gray-500 uppercase tracking-wider text-center mb-4">
+        <h2 className="text-sm sm:text-lg font-bold text-gray-500 uppercase tracking-wider text-center mb-4">
           🔬 Part 1 — Core Review Pipeline
         </h2>
       </div>
 
-      {/* Pipeline Overview — Horizontal Steps */}
-      <div className="mb-10">
-        <div className="flex flex-wrap items-center justify-center gap-2">
+      {/* Pipeline Overview — wraps on mobile */}
+      <div className="mb-6 sm:mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
           {steps.map((step, idx) => (
             <React.Fragment key={step.id}>
               <button
                 onClick={() => setActiveStep(idx)}
-                className={`flex flex-col items-center p-3 rounded-xl border-2 transition min-w-[80px] ${
+                className={`flex flex-col items-center p-2 sm:p-3 rounded-xl border-2 transition min-w-[60px] sm:min-w-[80px] ${
                   activeStep === idx
-                    ? colors[step.color] + ' scale-110 shadow-md'
+                    ? colors[step.color] + ' scale-105 sm:scale-110 shadow-md'
                     : 'bg-white border-gray-200 hover:border-gray-400'
                 }`}
               >
-                <span className="text-2xl mb-1">{step.icon}</span>
-                <span className="text-[10px] font-semibold text-center leading-tight">
+                <span className="text-xl sm:text-2xl mb-1">{step.icon}</span>
+                <span className="text-[9px] sm:text-[10px] font-semibold text-center leading-tight">
                   {step.short}
                 </span>
               </button>
               {idx < steps.length - 1 && (
-                <span className="text-gray-400 text-xl">→</span>
+                <span className="text-gray-400 text-base sm:text-xl">→</span>
               )}
             </React.Fragment>
           ))}
@@ -246,23 +242,23 @@ function HowItWorks() {
 
       {/* Active Step Detail Card */}
       <div
-        className={`mb-12 p-6 rounded-2xl border-2 ${colors[steps[activeStep].color]} bg-opacity-40`}
+        className={`mb-8 sm:mb-12 p-4 sm:p-6 rounded-2xl border-2 ${colors[steps[activeStep].color]} bg-opacity-40`}
       >
-        <div className="flex items-start gap-4">
-          <span className="text-5xl">{steps[activeStep].icon}</span>
+        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+          <span className="text-4xl sm:text-5xl">{steps[activeStep].icon}</span>
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white border">
                 {t('howStepLabel') || 'Step'} {steps[activeStep].id}
               </span>
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-800">
                 {steps[activeStep].title}
               </h2>
             </div>
-            <p className="text-gray-700 leading-relaxed mb-3">
+            <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3">
               {steps[activeStep].description}
             </p>
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="font-semibold text-gray-600">
                 🛠️ {t('howTechUsed') || 'Tech used'}:
               </span>
@@ -278,7 +274,7 @@ function HowItWorks() {
           <button
             onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
             disabled={activeStep === 0}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 disabled:opacity-30"
+            className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 disabled:opacity-30"
           >
             ← {t('howPrev') || 'Previous'}
           </button>
@@ -287,28 +283,26 @@ function HowItWorks() {
               setActiveStep(Math.min(steps.length - 1, activeStep + 1))
             }
             disabled={activeStep === steps.length - 1}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 disabled:opacity-30"
+            className="px-3 sm:px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 disabled:opacity-30"
           >
             {t('howNext') || 'Next'} →
           </button>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════
-          SECTION 2 — Companion Tools (Chat, Quiz, Presentation)
-         ═══════════════════════════════════════════════ */}
+      {/* SECTION 2 — Companion Tools */}
       <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-500 uppercase tracking-wider text-center mb-2">
+        <h2 className="text-sm sm:text-lg font-bold text-gray-500 uppercase tracking-wider text-center mb-2">
           🧰 Part 2 — Companion Tools
         </h2>
-        <p className="text-center text-sm text-gray-600 max-w-2xl mx-auto mb-6">
+        <p className="text-center text-xs sm:text-sm text-gray-600 max-w-2xl mx-auto mb-6">
           Beyond the review pipeline, ReviewMind includes three powerful tools
           that work on any content — not just research papers.
         </p>
       </div>
 
       {/* Tool Selector Tabs */}
-      <div className="flex flex-wrap justify-center gap-3 mb-6">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
         {tools.map((tool, idx) => {
           const a = toolAccents[tool.accent]
           const isActive = activeTool === idx
@@ -316,13 +310,13 @@ function HowItWorks() {
             <button
               key={tool.key}
               onClick={() => setActiveTool(idx)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 text-sm font-semibold transition ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 text-xs sm:text-sm font-semibold transition ${
                 isActive
                   ? a.ring + ' shadow-md scale-105'
                   : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400'
               }`}
             >
-              <span className="text-lg">{tool.icon}</span>
+              <span className="text-base sm:text-lg">{tool.icon}</span>
               {tool.name}
             </button>
           )
@@ -331,39 +325,40 @@ function HowItWorks() {
 
       {/* Active Tool Detail */}
       <div
-        className={`mb-12 rounded-2xl border-2 ${toolAccents[currentTool.accent].ring} p-6`}
+        className={`mb-8 sm:mb-12 rounded-2xl border-2 ${toolAccents[currentTool.accent].ring} p-4 sm:p-6`}
       >
-        {/* Tool header */}
         <div className="flex items-center gap-3 mb-1">
-          <span className="text-4xl">{currentTool.icon}</span>
+          <span className="text-3xl sm:text-4xl">{currentTool.icon}</span>
           <div>
-            <h3 className="text-xl font-bold text-gray-800">
+            <h3 className="text-base sm:text-xl font-bold text-gray-800">
               {currentTool.name}
             </h3>
-            <p className="text-sm text-gray-600">{currentTool.tagline}</p>
+            <p className="text-xs sm:text-sm text-gray-600">
+              {currentTool.tagline}
+            </p>
           </div>
         </div>
 
-        {/* Sub-steps */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+        {/* Sub-steps — stack on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 mt-5">
           {currentTool.steps.map((s, idx) => (
             <div
               key={idx}
-              className={`flex items-start gap-3 p-3 rounded-xl bg-white border ${toolAccents[currentTool.accent].stepBorder}`}
+              className={`flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl bg-white border ${toolAccents[currentTool.accent].stepBorder}`}
             >
               <div
-                className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${toolAccents[currentTool.accent].badge}`}
+                className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold ${toolAccents[currentTool.accent].badge}`}
               >
                 {idx + 1}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-base">{s.icon}</span>
-                  <h4 className="text-sm font-bold text-gray-800">
+                  <span className="text-sm sm:text-base">{s.icon}</span>
+                  <h4 className="text-xs sm:text-sm font-bold text-gray-800">
                     {s.title}
                   </h4>
                 </div>
-                <p className="text-xs text-gray-600 leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
@@ -379,7 +374,7 @@ function HowItWorks() {
               if (currentTool.key === 'quiz') navigate('/quiz')
               if (currentTool.key === 'presentation') navigate('/presentation')
             }}
-            className="px-5 py-2 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow-md transition"
+            className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium text-white rounded-lg shadow-sm hover:shadow-md transition"
             style={{
               backgroundColor:
                 currentTool.accent === 'blue'
@@ -394,58 +389,62 @@ function HowItWorks() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════
-          SECTION 3 — Key Features Grid
-         ═══════════════════════════════════════════════ */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+      {/* SECTION 3 — Key Features Grid */}
+      <div className="mb-8 sm:mb-12">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 text-center">
           ⭐ {t('howKeyFeatures') || 'Key Features'}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {features.map((f, idx) => (
             <div
               key={idx}
-              className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition"
+              className="bg-white border border-gray-200 rounded-xl p-3 sm:p-5 hover:shadow-lg transition"
             >
-              <div className="text-3xl mb-2">{f.icon}</div>
-              <h3 className="font-bold text-gray-800 mb-1">{f.title}</h3>
-              <p className="text-sm text-gray-600">{f.desc}</p>
+              <div className="text-2xl sm:text-3xl mb-2">{f.icon}</div>
+              <h3 className="text-sm sm:text-base font-bold text-gray-800 mb-1">
+                {f.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600">{f.desc}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Tech Stack */}
-      <div className="mb-12 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
+      <div className="mb-8 sm:mb-12 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 text-center">
           🛠️ {t('howTechStack') || 'Technology Stack'}
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-center">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase mb-1">
               Frontend
             </p>
-            <p className="text-sm text-gray-800">React • Vite • Tailwind</p>
+            <p className="text-xs sm:text-sm text-gray-800">
+              React • Vite • Tailwind
+            </p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase mb-1">
               Backend
             </p>
-            <p className="text-sm text-gray-800">FastAPI • Python 3.12</p>
+            <p className="text-xs sm:text-sm text-gray-800">
+              FastAPI • Python 3.12
+            </p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase mb-1">
               AI / ML
             </p>
-            <p className="text-sm text-gray-800">
+            <p className="text-xs sm:text-sm text-gray-800">
               Gemini 2.5 • scikit-learn
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase mb-1">
               Data Sources
             </p>
-            <p className="text-sm text-gray-800">
+            <p className="text-xs sm:text-sm text-gray-800">
               Semantic Scholar • OpenAlex
             </p>
           </div>
@@ -453,17 +452,17 @@ function HowItWorks() {
       </div>
 
       {/* CTA */}
-      <div className="text-center py-8 bg-white border-2 border-dashed border-blue-300 rounded-2xl">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+      <div className="text-center py-6 sm:py-8 bg-white border-2 border-dashed border-blue-300 rounded-2xl">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
           🚀 {t('howCtaTitle') || 'Ready to try it?'}
         </h2>
-        <p className="text-gray-600 mb-4">
+        <p className="text-sm sm:text-base text-gray-600 mb-4">
           {t('howCtaDesc') ||
             'Start your first systematic literature review in few minutes.'}
         </p>
         <button
           onClick={() => navigate('/review')}
-          className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium shadow-md"
+          className="px-6 sm:px-8 py-2.5 sm:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium shadow-md text-sm sm:text-base"
         >
           {t('howCtaButton') || 'Start Literature Review'} →
         </button>

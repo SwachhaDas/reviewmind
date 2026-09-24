@@ -2,8 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import chat, extract, pipeline, quiz, report, screen, search, upload
-from app.routes import presentation          # ← Already added
-from app.routes import review_history        # ← NEW
+from app.routes import presentation
+from app.routes import review_history
+from app.routes import stats  # ← NEW
 
 app = FastAPI(title="ReviewMind API")
 
@@ -27,7 +28,8 @@ app.include_router(pipeline.router, prefix="/api", tags=["pipeline"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 app.include_router(quiz.router, prefix="/api", tags=["quiz"])
 app.include_router(presentation.router, prefix="/api", tags=["presentation"])
-app.include_router(review_history.router, prefix="/api", tags=["review-history"])  # ← NEW
+app.include_router(review_history.router, prefix="/api", tags=["review-history"])
+app.include_router(stats.router, prefix="/api", tags=["statistics"])  # ← NEW
 
 
 @app.get("/")

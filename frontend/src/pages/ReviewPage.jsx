@@ -21,7 +21,7 @@ function ReviewPage() {
   const [filterDecision, setFilterDecision] = useState('all')
   const pollRef = useRef(null)
 
-  // ─── Review History state (new) ───
+  // ─── Review History state ───
   const [showHistory, setShowHistory] = useState(false)
   const [historyKey, setHistoryKey] = useState(0)
   const [currentSessionId, setCurrentSessionId] = useState(null)
@@ -97,7 +97,6 @@ function ReviewPage() {
         return
       }
 
-      // Restore full state
       setKeyword(data.keyword || '')
       setCriteria(data.criteria || '')
       setCriteriaMode('dropdown')
@@ -107,7 +106,7 @@ function ReviewPage() {
       setCurrentSessionId(data.session_id)
       setSelectedPaper(null)
       setFilterDecision('all')
-      setJobStatus(null)   // clear progress tracker
+      setJobStatus(null)
       setError('')
 
       if (window.innerWidth < 1024) {
@@ -169,7 +168,6 @@ function ReviewPage() {
               setDuplicatesRemoved(resultDups)
               setPipelineCounts(resultCounts)
 
-              // ─── Auto-save to history ───
               await saveSessionToHistory(
                 resultPapers,
                 resultDups,
@@ -253,7 +251,6 @@ function ReviewPage() {
         throw new Error(data.message || 'Report generation failed')
       }
 
-      // ─── Attach report filename to the current session ───
       if (currentSessionId && data.filename) {
         try {
           await fetch(REVIEW_ENDPOINTS.attachReport(currentSessionId), {
@@ -317,7 +314,7 @@ function ReviewPage() {
   }
 
   // ═══════════════════════════════════════════════
-  // Sidebar (reusable)
+  // Sidebar (mobile-responsive)
   // ═══════════════════════════════════════════════
   const HistorySidebar = () => (
     <>
@@ -359,21 +356,21 @@ function ReviewPage() {
   )
 
   return (
-    <div className="p-6 max-w-7xl mx-auto relative">
+    <div className="p-3 sm:p-6 max-w-7xl mx-auto relative">
       {/* ─── Header with History button ─── */}
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+      <div className="mb-4 sm:mb-6 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
             📚 {t('navReview')}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
             {t('reviewPageSubtitle')}
           </p>
         </div>
 
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition shadow-sm ${
+          className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border text-xs sm:text-sm font-medium transition shadow-sm ${
             showHistory
               ? 'bg-blue-500 text-white border-blue-500'
               : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600'
@@ -394,12 +391,12 @@ function ReviewPage() {
         </div>
       )}
 
-      <div className="mb-4 bg-white p-4 rounded-lg border">
+      <div className="mb-4 bg-white p-3 sm:p-4 rounded-lg border">
         <input
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder={t('searchPlaceholder')}
-          className="w-full px-4 py-2 border rounded-lg mb-3"
+          className="w-full px-3 sm:px-4 py-2 border rounded-lg mb-3 text-sm"
         />
 
         {criteriaMode === 'dropdown' ? (
@@ -407,7 +404,7 @@ function ReviewPage() {
             <select
               value={criteria}
               onChange={handleCriteriaSelect}
-              className="w-full px-4 py-2 border rounded-lg bg-white cursor-pointer appearance-none pr-10"
+              className="w-full px-3 sm:px-4 py-2 border rounded-lg bg-white cursor-pointer appearance-none pr-10 text-sm"
             >
               {criteriaOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -426,7 +423,7 @@ function ReviewPage() {
               onChange={(e) => setCriteria(e.target.value)}
               placeholder={t('criteriaPlaceholder')}
               rows="3"
-              className="w-full px-4 py-2 border rounded-lg mb-2"
+              className="w-full px-3 sm:px-4 py-2 border rounded-lg mb-2 text-sm"
               autoFocus
             />
             <button
@@ -442,18 +439,19 @@ function ReviewPage() {
           </div>
         )}
 
-        <div className="flex gap-2 mt-3">
+        {/* Buttons — stack on mobile */}
+        <div className="flex flex-col sm:flex-row gap-2 mt-3">
           <button
             onClick={runPipeline}
             disabled={loading}
-            className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium"
+            className="flex-1 px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium text-sm"
           >
             {loading ? '⏳ Running...' : t('runPipeline')}
           </button>
           <button
             onClick={downloadReport}
             disabled={!papers.some((p) => p.decision === 'Include')}
-            className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 font-medium"
+            className="px-4 sm:px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 font-medium text-sm"
           >
             {t('downloadReport')}
           </button>
@@ -476,12 +474,14 @@ function ReviewPage() {
 
       {papers.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-2 items-center">
-          <span className="text-sm text-gray-600 font-medium">Filter:</span>
+          <span className="text-xs sm:text-sm text-gray-600 font-medium">
+            Filter:
+          </span>
           {['all', 'Include', 'Exclude', 'Maybe'].map((f) => (
             <button
               key={f}
               onClick={() => setFilterDecision(f)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium transition ${
                 filterDecision === f
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -493,9 +493,9 @@ function ReviewPage() {
         </div>
       )}
 
-      {/* Results table — NO TRUNCATION */}
-      <div className="overflow-x-auto mb-6">
-        <table className="min-w-full bg-white border rounded-lg">
+      {/* Results table — horizontally scrollable on mobile */}
+      <div className="overflow-x-auto mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0">
+        <table className="min-w-full bg-white border rounded-lg text-xs sm:text-sm">
           <thead>
             <tr className="bg-gray-200 text-xs uppercase">
               <th className="px-2 py-2 text-left">#</th>
@@ -517,10 +517,10 @@ function ReviewPage() {
                   className="px-2 py-2 cursor-pointer align-top"
                   onClick={() => setSelectedPaper(paper)}
                 >
-                  <div className="text-sm font-medium text-gray-800">
+                  <div className="text-xs sm:text-sm font-medium text-gray-800">
                     {paper.title}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-1">
                     {paper.authors}
                   </div>
                 </td>
@@ -542,7 +542,7 @@ function ReviewPage() {
                       href={getLink(paper)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-xs"
+                      className="text-blue-600 hover:underline text-xs whitespace-nowrap"
                     >
                       🔗 DOI
                     </a>
@@ -573,15 +573,17 @@ function ReviewPage() {
           </tbody>
         </table>
         {papers.length === 0 && (
-          <p className="text-center text-gray-500 py-6">{t('noPapers')}</p>
+          <p className="text-center text-gray-500 py-6 text-sm">
+            {t('noPapers')}
+          </p>
         )}
       </div>
 
       {selectedPaper && (
-        <div className="space-y-4 bg-white p-4 rounded-lg border">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-800">
+        <div className="space-y-4 bg-white p-3 sm:p-4 rounded-lg border">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-semibold text-gray-800">
                 {selectedPaper.title}
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -592,7 +594,7 @@ function ReviewPage() {
                   href={getLink(selectedPaper)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs text-blue-600 hover:underline break-all"
                 >
                   🔗 {getLink(selectedPaper)}
                 </a>
@@ -600,7 +602,7 @@ function ReviewPage() {
             </div>
             <button
               onClick={() => setSelectedPaper(null)}
-              className="text-gray-400 hover:text-red-500 text-sm"
+              className="text-gray-400 hover:text-red-500 text-sm flex-shrink-0"
             >
               ✕
             </button>
