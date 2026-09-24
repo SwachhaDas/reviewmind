@@ -31,12 +31,16 @@ function MainLayout({ onBackToLanding }) {
       {/* Top Navigation Bar */}
       <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-2">
-          {/* Logo */}
+          {/* Logo — SVG mark + product name */}
           <div
             className="flex items-center gap-2 cursor-pointer flex-shrink-0"
             onClick={() => navigate('/')}
           >
-            <span className="text-xl sm:text-2xl">📚</span>
+            <img
+              src="/logo.svg"
+              alt="ReviewMind"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg shadow-sm"
+            />
             <span className="text-base sm:text-xl font-bold text-blue-600 truncate">
               {t('appName')}
             </span>

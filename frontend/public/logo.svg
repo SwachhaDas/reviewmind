@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Blue gradient rounded square background -->
+  <rect width="64" height="64" rx="14" fill="url(#rm_grad)"/>
+  
+  <!-- Document / paper outline -->
+  <path d="M20 18 L42 18 L42 46 L20 46 Z" 
+        stroke="#FFFFFF" stroke-width="2.5" 
+        stroke-linejoin="round" fill="none" opacity="0.95"/>
+  
+  <!-- Document text lines -->
+  <line x1="25" y1="26" x2="37" y2="26" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+  <line x1="25" y1="32" x2="37" y2="32" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+  <line x1="25" y1="38" x2="32" y2="38" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+  
+  <!-- AI sparkle (4-point star) -->
+  <path d="M47 32 L49 37 L54 39 L49 41 L47 46 L45 41 L40 39 L45 37 Z" 
+        fill="#FFFFFF" opacity="0.95"/>
+  
+  <!-- Small accent dot -->
+  <circle cx="50" cy="21" r="2" fill="#60A5FA"/>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="rm_grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="0.5" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1E40AF"/>
+    </linearGradient>
+  </defs>
+</svg>
