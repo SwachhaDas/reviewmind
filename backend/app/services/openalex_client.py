@@ -37,7 +37,7 @@ def search_openalex(keyword, year_min=2000, year_max=2030, limit=10):
 
     for attempt in range(max_retries):
         try:
-            response = requests.get(url, params=params, timeout=20)
+            response = requests.get(url, params=params, timeout=10)
 
             if response.status_code == 200:
                 data = response.json()

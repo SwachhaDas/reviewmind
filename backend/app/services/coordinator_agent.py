@@ -27,7 +27,7 @@ _BROWSER_UA = (
     "Chrome/120.0.0.0 Safari/537.36"
 )
 
-_PDF_TIMEOUT = 10.0
+_PDF_TIMEOUT = 3.0
 _MAX_PDF_BYTES = 8 * 1024 * 1024
 
 
@@ -108,7 +108,7 @@ def _get_unpaywall_pdf_url(doi: str) -> str:
         resp = requests.get(
             f"https://api.unpaywall.org/v2/{bare}",
             params={"email": _UNPAYWALL_EMAIL},
-            timeout=6,
+            timeout=3,
             headers={"User-Agent": "ReviewMind/1.0 (SLR tool)"},
         )
         if resp.status_code == 200:
@@ -137,7 +137,7 @@ def _get_semantic_scholar_pdf_url(doi: str) -> str:
         resp = requests.get(
             url,
             params={"fields": "openAccessPdf,externalIds"},
-            timeout=6,
+            timeout=3,
             headers={"User-Agent": "ReviewMind/1.0"},
         )
         if resp.status_code == 200:
@@ -168,7 +168,7 @@ def _get_core_pdf_url(doi: str) -> str:
         resp = requests.get(
             "https://api.core.ac.uk/v3/search/works",
             params={"q": f'doi:"{bare}"', "limit": 1},
-            timeout=8,
+            timeout=3,
             headers={"User-Agent": "ReviewMind/1.0"},
         )
         if resp.status_code == 200:
@@ -207,7 +207,7 @@ def _get_pmc_pdf_url(doi: str) -> str:
                 "tool": "reviewmind",
                 "email": _UNPAYWALL_EMAIL,
             },
-            timeout=6,
+            timeout=3,
             headers={"User-Agent": "ReviewMind/1.0"},
         )
         if resp.status_code == 200:
