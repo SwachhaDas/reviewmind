@@ -1,24 +1,22 @@
 """
-Chat routes — supports two chat modes + persistent per-user history.
+Chat routes — supports two chat modes + persistent history.
 
 Modes:
   - 'paper' : answer questions using ONLY the loaded paper content
   - 'free'  : answer any question using the AI's general knowledge
 
-All history endpoints require `X-User-Id` header (auto-set by frontend).
-
 Endpoints:
   POST   /api/chat                     Send a message, get AI response
-  GET    /api/chat/history             List MY chat sessions
-  GET    /api/chat/history/{id}        Get one of MY sessions
+  GET    /api/chat/history             List all chat sessions
+  GET    /api/chat/history/{id}        Get one session with full messages
   POST   /api/chat/history             Create a new empty session
-  PATCH  /api/chat/history/{id}/title  Update MY session title
-  DELETE /api/chat/history/{id}        Delete one of MY sessions
-  DELETE /api/chat/history             Clear all MY sessions
+  PATCH  /api/chat/history/{id}/title  Update session title
+  DELETE /api/chat/history/{id}        Delete one session
+  DELETE /api/chat/history             Clear all sessions
 """
 import re
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.gemini_client import chat_about_paper, _api_key, _MODEL_NAME
@@ -41,6 +39,7 @@ class ChatRequest(BaseModel):
     session_id: str = ""
     paper_title: str = ""
 
+    # Paper data — saved with the session for later reload
     paper_full_text: str = ""
     paper_abstract: str = ""
     paper_introduction: str = ""
@@ -66,18 +65,10 @@ class UpdateTitleRequest(BaseModel):
 # Helpers
 # ─────────────────────────────────────────────────────────────
 
-def _require_user_id(x_user_id: str) -> str:
-    """Validate X-User-Id header."""
-    if not x_user_id or len(x_user_id) < 4:
-        raise HTTPException(
-            status_code=400,
-            detail="Missing or invalid X-User-Id header.",
-        )
-    return x_user_id
-
-
 def _generate_session_title(text: str, lang: str = "en") -> str:
-    """Generate a short ChatGPT-style session title from the given text."""
+    """
+    Generate a short ChatGPT-style session title from the given text.
+    """
     if not text or not text.strip():
         return "New Chat"
 
@@ -159,16 +150,14 @@ QUESTION:
 # ─────────────────────────────────────────────────────────────
 
 @router.post("/chat")
-async def chat(
-    req: ChatRequest,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
+async def chat(req: ChatRequest):
     """
-    Send a question. Two modes: 'paper' or 'free'.
-    Saves both messages to history (isolated per user_id).
+    Send a question. Two modes:
+      - 'paper': uses context_text as the sole source
+      - 'free' : uses AI's general knowledge
+    Saves both messages to history and stores the paper data
+    so it can be reloaded from history later.
     """
-    user_id = _require_user_id(x_user_id)
-
     try:
         session_id = req.session_id
 
@@ -181,6 +170,7 @@ async def chat(
             else:
                 auto_title = _generate_session_title(req.question, req.lang)
 
+            # Build paper_data dict from request
             has_paper = bool(
                 req.paper_full_text or req.paper_abstract or req.paper_title
             )
@@ -200,18 +190,17 @@ async def chat(
                 }
 
             session = chat_history.create_session(
-                user_id=user_id,
                 title=auto_title,
                 paper_title=req.paper_title,
                 source="paper" if (req.mode == "paper" or req.context_text) else "free",
                 paper_data=paper_data,
             )
-            session_id = session["session_id"]
+            session_id = session["id"]
 
         # Save user message
-        chat_history.append_message(user_id, session_id, "user", req.question)
+        chat_history.append_message(session_id, "user", req.question)
 
-        # Generate answer
+        # Generate answer based on mode
         if req.mode == "paper":
             if not req.context_text or not req.context_text.strip():
                 answer = "No paper loaded. Please upload or paste a paper first."
@@ -223,7 +212,7 @@ async def chat(
             answer = result.get("answer", "No answer.")
 
         # Save assistant message
-        chat_history.append_message(user_id, session_id, "assistant", answer)
+        chat_history.append_message(session_id, "assistant", answer)
 
         return {
             "status": "success",
@@ -242,36 +231,24 @@ async def chat(
 # ─────────────────────────────────────────────────────────────
 
 @router.get("/chat/history")
-async def get_history_list(
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    """Return summary of MY chat sessions."""
-    user_id = _require_user_id(x_user_id)
-    return {"sessions": chat_history.list_sessions(user_id)}
+async def get_history_list():
+    """Return summary of all chat sessions."""
+    return {"sessions": chat_history.list_sessions()}
 
 
 @router.get("/chat/history/{session_id}")
-async def get_history_detail(
-    session_id: str,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    """Return full session data (must belong to user_id)."""
-    user_id = _require_user_id(x_user_id)
-    session = chat_history.get_session(user_id, session_id)
+async def get_history_detail(session_id: str):
+    """Return full session data."""
+    session = chat_history.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 
 
 @router.post("/chat/history")
-async def create_history_session(
-    req: CreateSessionRequest,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
+async def create_history_session(req: CreateSessionRequest):
     """Create a new empty session manually."""
-    user_id = _require_user_id(x_user_id)
     session = chat_history.create_session(
-        user_id=user_id,
         title=req.title,
         paper_title=req.paper_title,
         source=req.source,
@@ -280,18 +257,12 @@ async def create_history_session(
 
 
 @router.patch("/chat/history/{session_id}/title")
-async def update_history_title(
-    session_id: str,
-    req: UpdateTitleRequest,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
+async def update_history_title(session_id: str, req: UpdateTitleRequest):
     """Update a session's title."""
-    user_id = _require_user_id(x_user_id)
-
     if not req.title or not req.title.strip():
         raise HTTPException(status_code=400, detail="Title cannot be empty")
 
-    success = chat_history.update_session_title(user_id, session_id, req.title.strip())
+    success = chat_history.update_session_title(session_id, req.title.strip())
     if not success:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -303,23 +274,16 @@ async def update_history_title(
 
 
 @router.delete("/chat/history/{session_id}")
-async def delete_history_session(
-    session_id: str,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
+async def delete_history_session(session_id: str):
     """Delete one session."""
-    user_id = _require_user_id(x_user_id)
-    ok = chat_history.delete_session(user_id, session_id)
+    ok = chat_history.delete_session(session_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Session not found")
     return {"status": "success", "deleted": session_id}
 
 
 @router.delete("/chat/history")
-async def clear_history(
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    """Delete all MY sessions."""
-    user_id = _require_user_id(x_user_id)
-    count = chat_history.clear_all(user_id)
+async def clear_history():
+    """Delete all sessions."""
+    count = chat_history.clear_all()
     return {"status": "success", "deleted_count": count}

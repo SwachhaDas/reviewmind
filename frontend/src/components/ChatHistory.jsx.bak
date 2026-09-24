@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, userHeaders } from '../api'
+import { API_BASE } from '../api'
 
 /**
  * Chat History Sidebar — modern, professional design.
@@ -16,9 +16,7 @@ function ChatHistory({ refreshKey, onSelectSession }) {
   const fetchHistory = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/chat/history`, {
-        headers: userHeaders(),
-      })
+      const res = await fetch(`${API_BASE}/chat/history`)
       const data = await res.json()
       setSessions(data.sessions || [])
     } catch (err) {
@@ -39,7 +37,6 @@ function ChatHistory({ refreshKey, onSelectSession }) {
     try {
       await fetch(`${API_BASE}/chat/history/${sessionId}`, {
         method: 'DELETE',
-        headers: userHeaders(),
       })
       setSessions((prev) => prev.filter((s) => s.id !== sessionId))
       if (activeId === sessionId) setActiveId(null)
@@ -53,10 +50,7 @@ function ChatHistory({ refreshKey, onSelectSession }) {
     if (!window.confirm(`Delete all ${sessions.length} sessions?`)) return
 
     try {
-      await fetch(`${API_BASE}/chat/history`, {
-        method: 'DELETE',
-        headers: userHeaders(),
-      })
+      await fetch(`${API_BASE}/chat/history`, { method: 'DELETE' })
       setSessions([])
       setActiveId(null)
     } catch (err) {

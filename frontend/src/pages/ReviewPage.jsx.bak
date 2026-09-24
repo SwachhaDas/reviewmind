@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, REVIEW_ENDPOINTS, userHeaders, userJsonHeaders } from '../api'
+import { API_BASE, REVIEW_ENDPOINTS } from '../api'
 import PaperChat from '../components/PaperChat'
 import QuizGenerator from '../components/QuizGenerator'
 import ProgressTracker from '../components/ProgressTracker'
@@ -64,7 +64,7 @@ function ReviewPage() {
     try {
       const res = await fetch(REVIEW_ENDPOINTS.save, {
         method: 'POST',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           keyword: kw,
           criteria: cr,
@@ -90,9 +90,7 @@ function ReviewPage() {
   // ═══════════════════════════════════════════════
   const handleSelectSession = async (sessionId) => {
     try {
-      const res = await fetch(REVIEW_ENDPOINTS.session(sessionId), {
-        headers: userHeaders(),
-      })
+      const res = await fetch(REVIEW_ENDPOINTS.session(sessionId))
       const data = await res.json()
       if (data.status !== 'success') {
         setError(data.detail || 'Failed to load session')
@@ -257,7 +255,7 @@ function ReviewPage() {
         try {
           await fetch(REVIEW_ENDPOINTS.attachReport(currentSessionId), {
             method: 'POST',
-            headers: userJsonHeaders(),
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ report_filename: data.filename }),
           })
           setHistoryKey((k) => k + 1)
@@ -280,22 +278,15 @@ function ReviewPage() {
     return 'bg-gray-100 text-gray-600'
   }
 
-  // ═══════════════════════════════════════════════
-  // Source badge — supports all 4 sources
-  // ═══════════════════════════════════════════════
   const sourceColor = (source) => {
-    if (source === 'arxiv') return 'bg-red-100 text-red-800'
-    if (source === 'crossref') return 'bg-emerald-100 text-emerald-800'
-    if (source === 'openalex') return 'bg-purple-100 text-purple-800'
     if (source === 'semantic_scholar') return 'bg-blue-100 text-blue-800'
+    if (source === 'openalex') return 'bg-purple-100 text-purple-800'
     return 'bg-gray-100 text-gray-600'
   }
 
   const sourceLabel = (source) => {
-    if (source === 'arxiv') return 'arXiv'
-    if (source === 'crossref') return 'CR'
-    if (source === 'openalex') return 'OA'
     if (source === 'semantic_scholar') return 'SS'
+    if (source === 'openalex') return 'OA'
     return '—'
   }
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, userHeaders, userJsonHeaders } from '../api'
+import { API_BASE } from '../api'
 
 /**
  * ChatBox with two modes and session persistence.
@@ -37,9 +37,7 @@ function ChatBox({ contextText, paperTitle, paperData, sessionId, onSessionCreat
   const loadSession = async (sessionIdToLoad) => {
     if (!sessionIdToLoad) return
     try {
-      const res = await fetch(`${API_BASE}/chat/history/${sessionIdToLoad}`, {
-        headers: userHeaders(),
-      })
+      const res = await fetch(`${API_BASE}/chat/history/${sessionIdToLoad}`)
       const session = await res.json()
       if (session && session.messages) {
         setMessages(
@@ -88,7 +86,7 @@ function ChatBox({ contextText, paperTitle, paperData, sessionId, onSessionCreat
     try {
       const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           context_text: mode === 'paper' ? contextText : '',
           question: question,

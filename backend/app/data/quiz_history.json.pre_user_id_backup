@@ -1,0 +1,916 @@
+{
+  "sessions": [
+    {
+      "id": "d85e61ff7626",
+      "title": "Word Chain AI Game Project",
+      "content": "AI Project Report Word Chain Game Artificial Intelligence Project Report Project Title: Word Masters Pro: AI-Powered Word Chain Game with Informed Search Strategies Course Details Course Name: Artificial Intelligence Course Code: CSE 3318 Instructor Details Instructor Name: Tashin Hossain Department: Computer Science and Engineering University: Premier University Group Members Student ID Student Name 0222320005101063 Swachha Das 0222320005101052 Prerana Nandi 0222310005101002 Purna Chakraborty 0222320005101045 MD.Arif Uddin Submission Date: April 21, 2026 1\n\nAI Project Report Word Chain Game Contents 1 Abstract 4 2 Introduction 4 2.1 Overview of the Game . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4 2.2 Purpose of the Project . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5 2.3 Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5 3 Game Description & Design 5 3.1 Game Rules . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5 3.2 Game Environment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7 3.3 Game Flow . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8 4 AI Technique Used 13 4.1 Algorithm Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13 4.2 Justification . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 4.3 Working Principle . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 5 System Architecture 15 5.1 Block Diagram Description . . . . . . . . . . . . . . . . . . . . . . . . . . 15 5.2 Component Breakdown . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15 5.3 Architecture Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16 6 Simulation of Game & AI Behavior 16 6.1 Game Play Simulation . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16 6.2 AI Decision Simulation . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 6.3 Output Results . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 7 Implementation 19 7.1 Tools & Technologies . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19 7.2 Code Structure . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19 7.3 Core Modules and Functions . . . . . . . . . . . . . . . . . . . . . . . . . 20 7.4 Key Logic Explanation . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 8 Testing & Evaluation 22 8.1 Test Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22 8.2 Performance Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23 8.3 Edge Cases . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23 9 Gantt Chart (Project Timeline) 24 9.1 Task Plan . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 9.2 Timeline Representation (Visual Project Schedule) . . . . . . . . . . . . 25 10 Discussion 26 10.1 Strengths of AI . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26 10.2 Weaknesses or Limitations . . . . . . . . . . . . . . . . . . . . . . . . . . 26 10.3 Observations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26 2\n\nAI Project Report Word Chain Game 11 Conclusion 27 11.1 Summary of Achievements . . . . . . . . . . . . . . . . . . . . . . . . . . 27 11.2 AI Performance Evaluation . . . . . . . . . . . . . . . . . . . . . . . . . . 27 11.3 Learning Outcomes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 12 Future Improvements 28 12.1 Dynamic Difficulty Levels . . . . . . . . . . . . . . . . . . . . . . . . . . 28 12.2 Improved AI Intelligence (IDA*) . . . . . . . . . . . . . . . . . . . . . . . 28 12.3 Multiplayer & Social Features . . . . . . . . . . . . . . . . . . . . . . . . 28 13 Appendix 29 13.1 Source Code . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29 14 Statement of Contributions 35 3\n\nAI Project Report Word Chain Game 1 Abstract Word Chain Game is an AI-powered game designed to demonstrate the practical application of informed and uninformed search algorithms within an interactive web-based environment. Developed using Python, Flask, HTML, CSS, and JavaScript, the project centers on a classic word chain puzzle where each new word must start with the last letter of the previous word. The core technical achievement of the project is the integration of three distinct AI decision-making strategies based on difficulty levels: • Easy Mode (Uninformed Search): AI selects words randomly from a common word dictionary. • Medium Mode (Heuristic Search): AI prefers longer words (4-5 letters) to increase scoring opportunities. • Hard Mode (Minimax-like / Greedy Search): AI strategically selects words ending with rare letters (x, z, q, j, v) to trap the player. The project implements a timer system, scoring mechanism with bonus points for long words, sound effects, cartoon characters, and a responsive user interface. The AI successfully provides challenging gameplay while remaining beatable, creating an engaging experience for players of all skill levels. Testing confirms that the AI makes decisions in under 0.1 seconds across all difficulty levels. 2 Introduction 2.1 Overview of the Game Word Chain Game is a turn-based game where a player competes against an AI opponent. The AI starts by selecting a random word from a common word dictionary. The player must then enter a word that starts with the last letter of the AI’s word. The AI responds similarly, creating a chain of words. The game continues until either player cannot think of a valid word or the time runs out. The game features: • Three difficulty levels (Easy, Medium, Hard) • Timer system (per move and total game time) • Scoring system with bonuses for long words • Sound effects with on/off toggle • Cartoon characters for engagement • Rules page explaining gameplay 4\n\nAI Project Report Word Chain Game 2.2 Purpose of the Project The primary motivation behind this project is to demonstrate the practical application of Search Algorithms in an interactive gaming environment. While word chain games are typically played casually, this project treats the game as a state-space search problem where the AI must evaluate possible moves and select optimal ones based on difficultyspecific strategies. The purpose is to explore how an AI agent can: • Make decisions using different search strategies • Adapt its behavior based on difficulty levels • Provide challenging yet beatable gameplay • Maintain real-time responsiveness 2.3 Objectives The development and analysis of the project were guided by the following key objectives: 1. Build an AI-Based Game Environment: Develop a robust, stable, and responsive web application using Python Flask that accurately manages game state, validates moves, and enforces game rules. 2. Implement Decision-Making Algorithms: Integrate three distinct AI strategies: • Uninformed Search (Random) for Easy mode • Heuristic Search (Length-based) for Medium mode • Minimax-like / Greedy Search (Rare letters) for Hard mode 3. Create Engaging User Experience: Design a responsive interface with animations, sound effects, cartoon characters, and real-time feedback. 4. Evaluate Performance Metrics: Establish a quantitative framework to assess AI response time, decision quality, and player engagement across difficulty levels. 3 Game Description & Design 3.1 Game Rules The objective of the game is to create the longest possible chain of words following the word chain rule. Core Mechanics: • Each word must start with the last letter of the previous word • No word can be repeated during a single game • Words must exist in the dictionary • Time limits apply per move and total game time 5\n\nAI Project Report Word Chain Game Player vs AI Interaction: • AI always starts the game with a random word • Player enters a word starting with AI’s last letter • AI responds with another word • Game continues until time runs out or no valid words remain Winning Conditions: • Player wins by having a higher score when time expires • Player wins if AI has no valid words to play • AI wins if player has no valid words to play • AI wins if player runs out of time Losing Conditions: • Time Out: If the player fails to submit a word within the per-move time limit, AI receives +20 points and the player loses the turn • No Valid Words: If the player cannot think of any word starting with the required letter, the player loses immediately • Invalid Word: Entering a word not in the dictionary, a repeated word, or a word with wrong starting letter results in a loss of turn and AI gets an opportunity • Total Game Time Expiry: If the total game time (2-3 minutes depending on difficulty) reaches zero, the player with lower score loses • Violation of Word Length: In Medium mode (4-5 letters) or Hard mode (67 letters), entering a word with incorrect length causes immediate rejection and counts as an invalid move Time Limits per Difficulty: Difficulty Per Move Time Total Game Time Easy 15 seconds 2 minutes (120 sec) Medium 20 seconds 2.5 minutes (150 sec) Hard 25 seconds 3 minutes (180 sec) Table 1: Time Limits by Difficulty Word Length Requirements per Difficulty: Difficulty Minimum Length Maximum Length Easy 2 letters No maximum Medium 4 letters 5 letters Hard 6 letters 7 letters Table 2: Word Length Requirements 6\n\nAI Project Report Word Chain Game Summary of Losing Conditions: Condition Consequence Affected Player Time Out (per move) AI receives +20 points Player loses turn No valid words available Immediate loss Player or AI Word not in dictionary Move rejected, turn lost Player Wrong starting letter Move rejected, turn lost Player Repeated word Move rejected, turn lost Player Total game time expiry Lower score loses Player or AI Length violation (Medium/Hard) Move rejected Player Table 3: Summary of Losing Conditions 3.2 Game Environment The game environment is a web-based interface designed with a focus on clear state representation and user engagement. The Board/Interface: • Score board displaying Player and AI scores • Timer displays (move timer and total game timer) • Current letter indicator showing required starting letter • History panel showing all played words • Input field for word entry • Cartoon characters representing Player and AI • Sound toggle button • Rules button for game instructions Constraints: • Dictionary Check: Player words must exist in the full English dictionary • No Repetition: Same word cannot be used twice • Letter Matching: Word must start with required letter • Time Limits: Per move and total game time restrictions • Word Length: Length restrictions based on difficulty 7\n\nAI Project Report Word Chain Game Possible States and Actions: Component Description States Every unique combination of used words, current last letter, scores, and remaining time Actions Player enters a word; AI selects a word from possible words State Space Limited by dictionary size (370,000+ words) and game duration Table 4: States and Actions 3.3 Game Flow The game operates on an event-driven system. Below is the logical progression of a single session with step-by-step gameplay in a turn-based system. Step 1: Main Menu and Difficulty Selection Upon execution, the system displays the difficulty selection screen. The user clicks on ”Easy,” ”Medium,” or ”Hard.” System Logic: The choice determines per-move timer, total game timer, word length requirements, and scoring base. Figure 1: Main Menu and Difficulty Selection 8\n\nAI Project Report Word Chain Game Step 2: Game Initialization and AI First Word Once a difficulty is selected, the game engine initializes the game state. System Logic: • AI selects a random word from the common words dictionary • Timer starts (both move timer and total game timer) • Scores are reset to zero • History is cleared Figure 2: AI Starts with First Word 9\n\nAI Project Report Word Chain Game Step 3: Player Turn (Word Entry) The player enters a word in the input field and clicks Submit or presses Enter. System Logic: The engine validates: • Word exists in full dictionary • Word starts with required letter • Word hasn’t been used before • Word meets length requirement for difficulty Figure 3: Player Turn - Word Entry Interface 10\n\nAI Project Report Word Chain Game Step 4: Wrong Word Alert If the player enters an invalid word, the system displays an error message. System Logic: Error messages include: • ”Word not in dictionary!” • ”Word must start with X!” • ”Word already used!” • ”Medium mode requires 4-5 letter words!” • ”Hard mode requires 6-7 letter words!” Figure 4: Wrong Word Alert - Error Message Display Step 5: AI Turn (Decision Making) The AI selects a word based on difficulty level. System Logic: • Easy: Random selection from possible words (Uninformed Search) • Medium: Prefers 4-5 letter words (Heuristic Search) • Hard: Prefers 6-7 letter words ending with rare letters (x, z, q, j, v) - Greedy Search 11\n\nAI Project Report Word Chain Game Step 6: Timer Warning When only 5 seconds remain for a move, the timer circle turns red and a warning sound plays. Figure 5: Timer Warning (5 seconds left) Step 7: Winner Declaration and Score Display The session concludes with a performance review. The system compares Player and AI scores, declares the winner, and displays final scores. Figure 6: Winner Declaration Screen 12\n\nAI Project Report Word Chain Game Step 8: Rules Page (Optional) Players can view the game rules at any time by clicking the Rules button. Figure 7: Rules Modal Popup 4 AI Technique Used 4.1 Algorithm Overview The AI uses three distinct algorithms based on difficulty level: Easy Mode - Uninformed Search (Random Selection) The AI randomly selects any valid word from the possible words list. No evaluation or strategy is applied. AIword = random choice(possible words) Medium Mode - Heuristic Search (Length-Based) The AI evaluates possible words and prefers longer words (4-5 letters) because they yield higher scores. possible words = get words starting with(letter) long words = [w for w in possible words if 4 ≤len(w) ≤5] AIword = random choice(long words) if long words else random choice(possible words) 13\n\nAI Project Report Word Chain Game Hard Mode - Minimax-like / Greedy Search (Rare Letter Strategy) The AI evaluates possible words and prioritizes those ending with rare letters (x, z, q, j, v) to trap the player. possible words = get words starting with(letter) valid words = [w for w in possible words if 6 ≤len(w) ≤7] rare letters = [′x′,′ z′,′ q′,′ j′,′ v′] 4.2 Justification The three-algorithm approach was selected for the following reasons: Mode Algorithm Justification Easy Uninformed Search (Random) Simple, predictable, good for beginners; no complex evaluation needed Medium Heuristic Search Balanced challenge; longer words give more points; easy to understand Hard Minimax-like/ Greedy Strategic; tries to limit player’s options; creates challenging gameplay Table 5: Algorithm Justification Advantages in Game Scenario: 1. Efficiency: All algorithms make decisions in under 0.1 seconds 2. Scalability: Works with dictionary of any size 3. Adaptability: Different strategies create varied gameplay experiences 4. Transparency: Player can understand why AI made certain choices 4.3 Working Principle The AI makes decisions by evaluating the current game state and selecting the best available word according to its difficulty-specific strategy. Heuristic Function for Medium Mode: The heuristic evaluates words based on length: • Longer words (4-5 letters) receive higher priority 14\n\nAI Project Report Word Chain Game • This increases scoring potential for both AI and player Greedy Strategy for Hard Mode: The AI uses a greedy approach to trap the player: 1. Identify all valid words (6-7 letters) 2. Check ending letters against rare letter set {x, z, q, j, v} 3. Select first word ending with rare letter 4. If none, select random valid word State Representation: The game state is represented by: • Set of used words • Current last letter • Player and AI scores • Remaining move time • Remaining total game time 5 System Architecture The architecture of the system follows a modular design, ensuring a clear separation between the user interface, the game logic, and the artificial intelligence module. 5.1 Block Diagram Description The system operates in a cyclical feedback loop: 1. User Input triggers a state change in the Game Engine 2. Game Engine validates the move and updates game state 3. AI Module generates response based on difficulty 4. Output Display renders the updated state for the user 5.2 Component Breakdown Component Layer Function User Input Presentation Captures mouse clicks and keyboard events via JavaScript Game Engine Processing Maintains game state, enforces rules, validates moves AI Module Intelligence Generates AI responses using difficulty-specific algorithms Output Display Presentation Renders game state, scores, timers, and animations Dictionaries Data Stores common words (AI) and full dictionary (validation) Table 6: System Components 15\n\nAI Project Report Word Chain Game 5.3 Architecture Diagram Figure 8: System Architecture Block Diagram 6 Simulation of Game & AI Behavior 6.1 Game Play Simulation The following table tracks a sequence of moves from the start of a game, showcasing the turn-based interaction between Player and AI. Turn Player Word Last Letter Player Score AI Score 1 AI apple e 0 10 2 Player elephant t 20 10 3 AI tiger r 20 30 4 Player rabbit t 40 30 5 AI table e 40 50 6 Player egg g 55 50 7 AI goat t 55 70 8 Player tree e 75 70 9 AI eagle e 75 90 Table 7: Game Play Simulation Trace 16\n\nAI Project Report Word Chain Game Figure 9: Easy Mode Gameplay Figure 10: Medium Mode Gameplay Figure 11: Hard Mode Gameplay Figure 12: Simulation Screenshots for Easy, Medium, and Hard Modes 17\n\nAI Project Report Word Chain Game 6.2 AI Decision Simulation Scenario 1: Easy Mode Parameter Value Last Letter ’e’ Possible Words elephant, eagle, egg, end, every AI Strategy Random selection AI Choice ’eagle’ (random) Reasoning No evaluation; purely random Table 8: Easy Mode Decision Simulation Scenario 2: Medium Mode Parameter Value Last Letter ’t’ Possible Words tiger, table, tall, top, tree AI Strategy Prefer 4-5 letter words Heuristic Evaluation tiger(5), table(5), tall(4), top(3), tree(4) AI Choice ’tiger’ (5 letters) Reasoning Longer words yield higher scores Table 9: Medium Mode Decision Simulation Scenario 3: Hard Mode Parameter Value Last Letter ’r’ Possible Words rabbit, razor, river, zebra, lizard AI Strategy Prefer 6-7 letters ending with rare letters Heuristic Evaluation rabbit(6,r), razor(5,z), river(5,r), zebra(5,a), lizard(6,d) Rare Letter Check ’z’ found in ’razor’ AI Choice ’razor’ Reasoning Ends with ’r’ (not rare), but ’razor’ has rare letter ’z’ Table 10: Hard Mode Decision Simulation 6.3 Output Results The simulation concludes based on time expiration or inability to play. Final Outcome Scenarios: Scenario Winner Condition Time expires, Player score higher Player Total game time reaches zero Time expires, AI score higher AI Total game time reaches zero Player cannot move AI No valid words starting with required letter AI cannot move Player AI has no valid words Table 11: Output Results Scenarios 18\n\nAI Project Report Word Chain Game Scoring Calculation Example (Easy Mode): Component Value Base points per word 10 Long word bonus (5+ letters) +5 per extra letter Player word: ”elephant” (8 letters) 10 + (8-4)×5 = 10 + 20 = 30 points AI word: ”tiger” (5 letters) 10 + (5-4)×5 = 10 + 5 = 15 points Table 12: Scoring Example 7 Implementation 7.1 Tools & Technologies The project is built using a stack that prioritizes flexibility, rapid development, and cross-platform compatibility. Tool Purpose Python 3.10+ Backend programming language Flask Web framework for server-side logic HTML5 Frontend structure CSS3 Styling and animations JavaScript Frontend logic, sound, and real-time updates Web Audio API Sound effects generation JSON Data serialization (game state) Table 13: Tools and Technologies 7.2 Code Structure The implementation follows a modular approach, separating concerns across multiple files. Project Directory Structure: WordChainGame/ app.py # Flask backend + AI logic common_words.txt # Dictionary for AI moves (2000+ words) full_words.txt # Dictionary for player validation (370k+ words) templates/ index.html # Frontend UI static/ style.css # Styling + animations script.js # Frontend logic + sound 19\n\nAI Project Report Word Chain Game 7.3 Core Modules and Functions app.py (Backend Controller): Function Purpose load words() Loads dictionaries from text files get possible words() Finds all valid words starting with a letter validate word length() Checks word length against difficulty requirements calculate word score() Calculates points for a word get ai move() Selects AI’s word based on difficulty start game() Initializes new game session play() Processes player move and generates AI response Table 14: Backend Functions script.js (Frontend Logic): Function Purpose startGame() Initializes game on difficulty selection sendWord() Sends player word to backend startMoveTimer() Manages per-move countdown startGameTimer() Manages total game countdown updateRing() Updates timer circle animation playSound() Generates sound effects updateCharacter() Updates cartoon character expressions Table 15: Frontend Functions 7.4 Key Logic Explanation State Representation (Game Session): Listing 1: Game Session State 1 session = { 2 ’mode ’: ’easy ’, # Current difficulty 3 ’used_words ’: [’apple ’], # List of used words 4 ’last_letter ’: ’e’, # Required starting letter 5 ’scores ’: {’player ’: 0, ’ai’: 0} # Current scores 6 } Move Validation Logic: Listing 2: Move Validation 1 # Player word validation 2 if player_word not in full_words: 3 return error(\"Word␣not␣in␣dictionary!\") 4 if player_word in used: 5 return error(\"Word␣already␣used!\") 6 if not player_word.startswith(last): 7 return error(f\"Word␣must␣start␣with␣’{last}’!\") 20\n\nAI Project Report Word Chain Game AI Decision Logic (Hard Mode): Listing 3: Hard Mode AI Decision 1 def get_ai_move(mode , possible_words ): 2 if mode == ’hard ’: 3 # Filter for 6-7 letter words 4 valid_words = [w for w in possible_words if 6 <= len(w) <= 7] 5 # Check for rare ending letters 6 rare_letters = [’x’, ’z’, ’q’, ’j’, ’v’] 7 for word in valid_words: 8 if word [-1] in rare_letters: 9 return word # Trap the player 10 return random.choice(valid_words) 21\n\nAI Project Report Word Chain Game 8 Testing & Evaluation 8.1 Test Scenarios To ensure the game functions correctly across all difficulty levels, the following gameplay scenarios were simulated and verified. Test Case Description Expected Result Status Valid word input Player enters correct word Word accepted, game continues Pass Invalid word Player enters nondictionary word Error: ”not in dictionary” Pass Wrong starting letter Word doesn’t start with required letter Error: ”must start with X” Pass Repeated word Player enters already used word Error: ”already used” Pass Length violation (Medium) Word has 3 letters Error: requires 4-5 letters Pass Length violation (Hard) Word has 5 letters Error: requires 6-7 letters Pass Time out Player doesn’t move in time AI gets +20 points, game ends Pass No AI moves AI has no valid words Player wins Pass No player moves Player has no valid words AI wins Pass Sound toggle Click sound button Sound on/off toggles Pass Rules modal Click Rules button Rules popup displays Pass Table 16: Test Scenarios 22\n\nAI Project Report Word Chain Game 8.2 Performance Analysis Metric Easy Medium Hard AI response time ¡0.05 sec ¡0.05 sec ¡0.1 sec Page load time ¡1 sec ¡1 sec ¡1 sec Dictionary load time 2 sec 2 sec 2 sec Memory usage 50 MB 50 MB 50 MB Frame rate 60 FPS 60 FPS 60 FPS Table 17: Performance Analysis 8.3 Edge Cases Edge Case Handling Empty word input Error message: ”Please enter a word!” Word with spaces Trimmed before validation Uppercase input Converted to lowercase No words in dictionary Fallback words provided Time expires during move AI gets +20 points Identical scores at time end Declared as Tie AI word validation failure Fallback to first valid word Table 18: Edge Cases Handling 23\n\nAI Project Report Word Chain Game 9 Gantt Chart (Project Timeline) The project was executed over a 13-week duration, following a standard software development lifecycle. 9.1 Task Plan The following tasks were completed during the project across five major phases: • Phase 1: Idea Selection & Research (Week 1-3) – Defining the word chain puzzle and game mechanics – Researching AI search algorithms (Uninformed Search, Heuristic Search, Minimaxlike) – Selecting technology stack (Python, Flask, HTML, CSS, JavaScript) – Defining project scope and objectives – Milestone: Tech Stack Confirmed by Week 3 • Phase 2: Game Design & Dictionary Setup (Week 4-6) – Designing the modular architecture (Game Engine, AI Module, UI) – Defining game rules and winning/losing conditions – Creating game flow diagrams – Designing cartoon characters and animations – Creating common words.txt for AI moves (2000+ common words) – Downloading full words.txt for player validation (370,000+ words) – Building word graph for fast word lookup – Milestone: Design Blueprints Approved by Week 6 • Phase 3: Implementation (Week 7-10) – Setting up Flask server with routes (/start game, /play) – Implementing game state management – Building word validation logic from full dictionary – Creating session management for game state persistence – Creating HTML/CSS structure for game interface – Implementing timer system (move timer + total game timer) – Adding responsive design for mobile and desktop – Easy Mode: Uninformed Search - Random selection from possible words – Medium Mode: Heuristic Search - Preferring 4-5 letter words – Hard Mode: Minimax-like / Greedy Search - Prioritizing rare ending letters (x, z, q, j, v) – Adding sound effects with on/off toggle using Web Audio API 24\n\nAI Project Report Word Chain Game – Creating cartoon characters with speech bubbles – Implementing CSS animations (floating, bouncing, sliding) – Adding confetti animation on win – Milestone: Initial AI Solver Functional by Week 10 • Phase 4: Testing & Optimization (Week 11-12) – Stress-testing solver for all difficulty levels – Fixing edge cases (empty input, wrong letter, repeated words) – Optimizing AI response time (¡0.1 seconds) – Cross-browser testing (Chrome, Firefox, Edge) – Mobile responsiveness testing – Milestone: Solver Optimized & Tested by Week 12 • Phase 5: Report Writing & Finalization (Week 13) – Writing project report (Abstract to Appendix) – Adding screenshots of game flow – Preparing final submission documents – Milestone: Final Submission Ready by Week 13 9.2 Timeline Representation (Visual Project Schedule) The following Gantt chart illustrates the complete 13-week project timeline with task distribution across all phases of development. 25\n\nAI Project Report Word Chain Game 10 Discussion 10.1 Strengths of AI Weakness Description No Learning Capability AI does not improve over time or adapt to player patterns Simple Hard Mode Strategy Hard mode uses greedy approach rather than true Minimax Dictionary Dependency Game quality depends on dictionary completeness No Difficulty Adjustment Difficulty does not adapt to player skill level Table 19: Weaknesses of AI 10.2 Weaknesses or Limitations Weakness Description No Learning Capability AI does not improve over time or adapt to player patterns Simple Hard Mode Strategy Hard mode uses greedy approach rather than true Minimax Dictionary Dependency Game quality depends on dictionary completeness No Difficulty Adjustment Difficulty does not adapt to player skill level Table 20: Weaknesses of AI 10.3 Observations • Human vs AI Gap: Players tend to use shorter, more common words, while AI in Hard mode strategically uses rare ending letters • Time Pressure: Timer significantly affects player performance, especially in Hard mode • Sound Effects: Sound improves engagement but can be distracting for some players • Cartoon Characters: Visual feedback increases player satisfaction 26\n\nAI Project Report Word Chain Game 11 Conclusion 11.1 Summary of Achievements Word Masters Pro successfully integrates three distinct AI search strategies into an interactive web-based word chain game. All core requirements were met within the 4-week timeframe: ✓Fully functional word chain game with three difficulty levels ✓AI using Uninformed Search (Easy), Heuristic Search (Medium), and Minimaxlike/Greedy Search (Hard) ✓Timer system with per-move and total game time limits ✓Scoring system with long word bonuses ✓Sound effects with on/off toggle ✓Cartoon characters with speech bubbles ✓Responsive UI with animations ✓Rules page with game instructions 11.2 AI Performance Evaluation Difficulty Algorithm Performance AI Win Rate Recommendation Easy Uninformed Search (Random) Excellent ∼40% Good for beginners Medium Heuristic (Lengthbased) Excellent ∼55% Balanced challenge Hard Minimaxlike/Greedy Good ∼70% Challenging but fair Table 21: AI Performance Evaluation 11.3 Learning Outcomes Through this project, I gained practical expertise in: 1. Implementing informed and uninformed search algorithms in a real-world application 2. Designing heuristic functions for game AI 3. Full-stack web development with Flask, HTML, CSS, and JavaScript 27\n\nAI Project Report Word Chain Game 4. Real-time game state management and validation 5. User experience design principles for gaming applications 6. Performance testing and optimization 12 Future Improvements 12.1 Dynamic Difficulty Levels While ”Easy,” ”Medium,” and ”Hard” are implemented, future versions could include a ”Expert Mode” where the word length requirement increases to 8-9 letters and permove time reduces to 10 seconds. This would force the AI to adapt its constraint logic dynamically and provide an extreme challenge for advanced players. 12.2 Improved AI Intelligence (IDA*) To handle even larger dictionaries with less memory usage, the algorithm could be upgraded to Iterative Deepening A* (IDA*). IDA* combines depth-first search’s memory efficiency with A*’s optimality. This would allow the AI to search deeper into the game tree without consuming excessive RAM, making it suitable for deployment on resourceconstrained devices. 12.3 Multiplayer & Social Features • Ghost Mode: Allow the player to race against a ”Ghost” of the AI performing optimal moves in real-time. • Global Leaderboards: Expand the current local high scores into a web-based database using Firebase or MySQL to allow competitive rankings across different users. • Daily Challenges: Curated word sets with bonus points and time-limited events. • Friend Matches: Allow players to challenge friends via shareable links. 28\n\nAI Project Report Word Chain Game 13 Appendix 13.1 Source Code The following Python implementation utilizes the Flask framework for the backend and JavaScript for the frontend for the Word Masters Pro game. app.py - Main Backend Server Listing 4: app.py 1 from flask import Flask , render_template , request , jsonify 2 import random 3 from collections import defaultdict 4 5 app = Flask(__name__) 6 7 # Load common words for AI 8 def load_common_words (filename): 9 try: 10 with open(filename , ’r’) as f: 11 words = set(word.strip ().lower () for word in f 12 if word.strip ().isalpha () and len(word. strip ()) > 1) 13 print(f\"Loaded␣{len(words)}␣common␣words␣from␣{filename}\" ) 14 return words 15 except FileNotFoundError : 16 print(f\"WARNING:␣{filename}␣not␣found!␣Using␣fallback␣ words.\") 17 return set([\"cat\", \"dog\", \"ball\", \"fish\", \"bird\", \"sun\"]) 18 19 # Load full dictionary for player validation 20 def load_full_words (filename): 21 try: 22 with open(filename , ’r’) as f: 23 words = set(word.strip ().lower () for word in f 24 if word.strip ().isalpha () and len(word. strip ()) > 1) 25 print(f\"Loaded␣{len(words)}␣full␣words␣from␣{filename}\") 26 return words 27 except FileNotFoundError : 28 print(f\"WARNING:␣{filename}␣not␣found!␣Using␣fallback␣ words.\") 29 return set([\"cat\", \"dog\", \"ball\"]) 30 31 common_words = load_common_words (’common_words.txt’) 32 full_words = load_full_words (’full_words.txt’) 33 34 # Build word graph for AI moves 35 word_graph = defaultdict(list) 36 for word in common_words : 29\n\nAI Project Report Word Chain Game 37 if len(word) > 0: 38 word_graph[word [0]]. append(word) 39 40 def validate_word_length (word , mode): 41 \"\"\"Check␣word␣length␣requirement␣based␣on␣difficulty\"\"\" 42 if mode == ’easy ’: 43 return len(word) >= 2 44 elif mode == ’medium ’: 45 return 4 <= len(word) <= 5 46 else: # hard 47 return 6 <= len(word) <= 7 48 49 def calculate_word_score (word , mode): 50 \"\"\"Calculate␣score␣with␣bonus␣for␣long␣words\"\"\" 51 base_scores = {’easy ’: 10, ’medium ’: 20, ’hard ’: 30} 52 score = base_scores[mode] 53 if len(word) >= 5: 54 score += (len(word) - 4) * 5 55 return score 56 57 def get_ai_move(mode , possible_words ): 58 \"\"\"AI␣decision␣making␣based␣on␣difficulty␣level\"\"\" 59 if not possible_words : 60 return None 61 62 if mode == ’easy ’: 63 # Easy Mode: Uninformed Search - Random selection 64 return random.choice(possible_words ) 65 66 elif mode == ’medium ’: 67 # Medium Mode: Heuristic Search - Prefer longer words (4-5 letters) 68 valid_words = [w for w in possible_words if 4 <= len(w) <= 5] 69 if valid_words: 70 return random.choice(valid_words) 71 return random.choice(possible_words ) 72 73 else: # hard 74 # Hard Mode: Minimax -like / Greedy - Trap player with rare letters 75 valid_words = [w for w in possible_words if 6 <= len(w) <= 7] 76 if not valid_words: 77 valid_words = possible_words 78 79 rare_letters = [’x’, ’z’, ’q’, ’j’, ’v’] 80 for word in valid_words: 81 if word [-1] in rare_letters: 82 return word # Strategic trap move 83 30\n\nAI Project Report Word Chain Game 84 return random.choice(valid_words) 85 86 @app.route(’/’) 87 def index (): 88 \"\"\"Render␣the␣main␣game␣page\"\"\" 89 return render_template (’index.html ’) 90 91 @app.route(’/start_game ’, methods =[’POST ’]) 92 def start_game (): 93 \"\"\"Initialize␣new␣game␣session\"\"\" 94 data = request.json 95 mode = data.get(’mode ’, ’easy ’) 96 97 if not common_words : 98 return jsonify ({’error ’: ’No␣words␣loaded!’}) 99 100 # Filter words by length requirement for this mode 101 valid_words = [w for w in common_words if validate_word_length (w, mode)] 102 if not valid_words: 103 valid_words = list(common_words) 104 105 ai_word = random.choice(valid_words) 106 107 # Timer settings based on difficulty 108 timer_settings = { 109 ’easy ’: {’move ’: 15, ’total ’: 120}, 110 ’medium ’: {’move ’: 20, ’total ’: 150}, 111 ’hard ’: {’move ’: 25, ’total ’: 180} 112 } 113 114 session = { 115 ’mode ’: mode , 116 ’used_words ’: [ai_word], 117 ’last_letter ’: ai_word [-1], 118 ’scores ’: {’player ’: 0, ’ai’: 0}, 119 ’move_time ’: timer_settings [mode ][’move ’], 120 ’total_time ’: timer_settings [mode ][’total ’] 121 } 122 123 return jsonify ({ 124 ’session ’: session , 125 ’ai_word ’: ai_word , 126 ’last_letter ’: ai_word [-1], 127 ’message ’: f\"AI:␣’{ai_word}’␣ ␣Your␣turn!␣Word␣starting ␣with␣’{ai_word [-1]}’\", 128 ’move_time ’: timer_settings [mode ][’move ’], 129 ’total_time ’: timer_settings [mode ][’total ’] 130 }) 131 132 @app.route(’/play ’, methods =[’POST ’]) 31\n\nAI Project Report Word Chain Game 133 def play (): 134 \"\"\"Process␣player␣move␣and␣generate␣AI␣response\"\"\" 135 data = request.json 136 session = data[’session ’] 137 player_word = data.get(’word ’, ’’).strip ().lower () 138 139 mode = session[’mode ’] 140 used = set(session[’used_words ’]) 141 last = session[’last_letter ’] 142 143 # ========== VALIDATION CHECKS ========== 144 if not player_word: 145 return jsonify ({’error ’: ’Please␣enter␣a␣word!’}) 146 147 # Check if word exists in full dictionary 148 if player_word not in full_words: 149 return jsonify ({’error ’: f’\"{ player_word }\"␣not␣in␣ dictionary!’}) 150 151 # Check for word repetition 152 if player_word in used: 153 return jsonify ({’error ’: f’\"{ player_word }\"␣already␣used!’ }) 154 155 # Check if word starts with required letter 156 if not player_word.startswith(last): 157 return jsonify ({’error ’: f’Word␣must␣start␣with␣\"{ last }\"! ’}) 158 159 # Check word length requirement for difficulty 160 if not validate_word_length (player_word , mode): 161 if mode == ’medium ’: 162 return jsonify ({’error ’: f’Medium␣mode␣requires␣4-5␣ letter␣words!␣\"{ player_word }\"␣has␣{len(player_word )}␣letters.’}) 163 elif mode == ’hard ’: 164 return jsonify ({’error ’: f’Hard␣mode␣requires␣6-7␣ letter␣words!␣\"{ player_word }\"␣has␣{len(player_word )}␣letters.’}) 165 166 # ========== PLAYER SCORE CALCULATION ========== 167 player_score = calculate_word_score (player_word , mode) 168 session[’scores ’][’player ’] += player_score 169 used.add(player_word) 170 new_last = player_word [-1] 171 172 # ========== AI MOVE ========== 173 possible = word_graph.get(new_last , []) 174 possible = [w for w in possible if w not in used] 175 176 # No possible words for AI - Player wins 32\n\nAI Project Report Word Chain Game 177 if not possible: 178 return jsonify ({ 179 ’game_over ’: True , 180 ’winner ’: ’player ’, 181 ’ai_word ’: None , 182 ’message ’: f’YOU␣WIN!␣No␣words␣starting␣with␣\"{ new_last }\"!’, 183 ’scores ’: session[’scores ’] 184 }) 185 186 # Filter AI words by length requirement 187 possible = [w for w in possible if validate_word_length (w, mode)] 188 189 if not possible: 190 return jsonify ({ 191 ’game_over ’: True , 192 ’winner ’: ’player ’, 193 ’ai_word ’: None , 194 ’message ’: f’YOU␣WIN!␣AI␣has␣no␣valid␣length␣words!’, 195 ’scores ’: session[’scores ’] 196 }) 197 198 ai_word = get_ai_move(mode , possible) 199 ai_score = calculate_word_score (ai_word , mode) 200 session[’scores ’][’ai’] += ai_score 201 used.add(ai_word) 202 session[’used_words ’] = list(used) 203 session[’last_letter ’] = ai_word [-1] 204 205 # Check if player has next move 206 player_possible = word_graph.get(ai_word [-1], []) 207 player_possible = [w for w in player_possible if w not in used and validate_word_length (w, mode)] 208 209 if not player_possible : 210 return jsonify ({ 211 ’game_over ’: True , 212 ’winner ’: ’ai’, 213 ’ai_word ’: ai_word , 214 ’message ’: f’AI␣WINS!␣No␣valid␣words␣starting␣with␣\"{ ai_word [ -1]}\"! ’, 215 ’scores ’: session[’scores ’] 216 }) 217 218 # Game continues 219 return jsonify ({ 220 ’game_over ’: False , 221 ’ai_word ’: ai_word , 222 ’last_letter ’: ai_word [-1], 33\n\nAI Project Report Word Chain Game 223 ’message ’: f’AI:␣\"{ ai_word }\"␣ ␣Your␣turn!␣Word␣starting ␣with␣\"{ ai_word [ -1]}\"’, 224 ’scores ’: session[’scores ’], 225 ’session ’: session 226 }) 227 228 @app.route(’/ get_word_image /<word >’) 229 def get_word_image (word): 230 \"\"\"Generate␣image␣URL␣for␣word\"\"\" 231 return jsonify ({’image_url ’: f\"https :// api.dicebear.com /7.x/ identicon/png?seed ={ word }& size =80\"}) 232 233 if __name__ == ’__main__ ’: 234 app.run(debug=True , host=’0.0.0.0 ’, port =5000) commonwords.txt −AIDictionary Listing 5: commonwords.txt 1 cat 2 dog 3 ball 4 fish 5 bird 6 sun 7 moon 8 star 9 tree 10 flower 11 happy 12 smile 13 run 14 fast 15 big 16 small 17 red 18 blue 19 green 20 yellow 21 house 22 car 23 bus 24 train 25 plane 26 water 27 fire 28 earth 29 sky 30 cloud 34\n\nAI Project Report Word Chain Game fullwords.txt −CompleteDictionary Download:https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt Contains 370,000+ English words for player validation 14 Statement of Contributions The following table outlines the specific contributions of each team member towards the successful completion of the Word Masters Pro project. Student ID Name Primary Responsibilities 0222320005101063 Swachha Das AI Algorithm Design (Easy/Medium/Hard), Backend Development, Flask Integration, Proposal Writing 0222320005101052 Prerana Nandi Frontend Development (HTML/CSS/JS), Timer System, Animations, QA Testing, Technical Report Writing 0222310005101002 Purna Chakraborty QA Testing, Edge Case Handling, Dictionary Management, Technical Report Writing 0222320005101045 MD.Arif Uddin Sound Effects Implementation, Cartoon Characters, UI/UX Design, Presentation Table 22: Detailed Team Member Contributions References • Russell, S., & Norvig, P. (2020). Artificial Intelligence: A Modern Approach. Pearson. • Flask Documentation. (2024). Flask Web Framework. https://flask.palletsprojects.com/ • dwyl. (2024). English Words Database. GitHub. https://github.com/dwyl/englishwords • MDN Web Docs. (2024). Web Audio API. Mozilla. 35",
+      "content_preview": "AI Project Report Word Chain Game Artificial Intelligence Project Report Project Title: Word Masters Pro: AI-Powered Word Chain Game with Informed Search Strategies Course Details Course Name: Artific",
+      "source": "uploaded",
+      "num_questions": 5,
+      "created_at": "2026-09-20T19:42:15.628615Z",
+      "updated_at": "2026-09-20T19:42:49.632466Z",
+      "questions": [
+        {
+          "question": "Which difficulty mode uses an uninformed search strategy where the AI selects words randomly from the dictionary?",
+          "options": [
+            "Easy Mode",
+            "Medium Mode",
+            "Hard Mode",
+            "Expert Mode"
+          ],
+          "correct_index": 0,
+          "explanation": "Easy Mode utilizes an uninformed search strategy (random selection) without any complex evaluation or strategy."
+        },
+        {
+          "question": "What is the primary heuristic strategy used by the AI in Medium Mode?",
+          "options": [
+            "Prioritizing words ending with rare letters",
+            "Selecting words randomly",
+            "Preferring longer words (4-5 letters) for higher scoring opportunities",
+            "Maximizing letter matching counts"
+          ],
+          "correct_index": 2,
+          "explanation": "In Medium Mode, the AI applies heuristic search by preferring longer words (4-5 letters) to increase scoring opportunities."
+        },
+        {
+          "question": "According to Table 1, what is the per-move time limit for the Hard difficulty level?",
+          "options": [
+            "15 seconds",
+            "20 seconds",
+            "25 seconds",
+            "30 seconds"
+          ],
+          "correct_index": 2,
+          "explanation": "Table 1 (Time Limits by Difficulty) specifies that the per-move time limit for Hard difficulty is 25 seconds."
+        },
+        {
+          "question": "What happens if a player enters a word that does not meet the length requirement in Medium mode (4-5 letters)?",
+          "options": [
+            "The player receives bonus points",
+            "The move is rejected, the turn is lost, and an error message is displayed",
+            "The AI loses its turn",
+            "The game automatically ends in a draw"
+          ],
+          "correct_index": 1,
+          "explanation": "Entering a word with an incorrect length in Medium or Hard mode causes immediate rejection and counts as an invalid move, making the player lose their turn."
+        },
+        {
+          "question": "How does the AI choose words in Hard Mode to actively trap the player?",
+          "options": [
+            "By choosing the shortest possible words",
+            "By picking words that start with vowels",
+            "By prioritizing 6-7 letter words ending with rare letters (x, z, q, j, v)",
+            "By repeating previously used words"
+          ],
+          "correct_index": 2,
+          "explanation": "In Hard Mode, the AI uses a greedy/Minimax-like strategy that prioritizes 6-7 letter words ending with rare letters (x, z, q, j, v) to limit and trap the player."
+        }
+      ],
+      "answers": [
+        0,
+        1,
+        2,
+        0,
+        2
+      ],
+      "score": {
+        "correct": 3,
+        "total": 5,
+        "percentage": 60
+      },
+      "completed": true
+    },
+    {
+      "id": "db3b6a677b50",
+      "title": "Proton Account Recovery Guide",
+      "content": "Recovery kit Recovery phrase If you get locked out of your Proton Account, use this phrase to sign in and recover your data. Password If you want, write down your password to help you remember. Why do I need a recovery phrase? Proton’s high-level security technology means that nobody (not even us) can access your data without your password or your recovery phrase. So it’s important to keep your recovery phrase somewhere safe and accessible. If you reset your password without it, anything on your account before the reset will remain locked. Safe storage tips « If you can, it’s best to write down or print a copy of your recovery phrase, and store it in a safe, or wherever you keep important documents « For digital storage, try an encrypted password manager or cloud storage. We usually recommend Proton Drive or Proton Pass, but not this time—you won’t be able to access any of our services if you get locked out. Need help? Get in touch at . proton.me/support/contact swachharesearch@proton.me Created on September 10th, 2026 install ribbon sick mimic mechanic goddess logic describe column toe soda start",
+      "content_preview": "Recovery kit Recovery phrase If you get locked out of your Proton Account, use this phrase to sign in and recover your data. Password If you want, write down your password to help you remember. Why do",
+      "source": "uploaded",
+      "num_questions": 5,
+      "created_at": "2026-09-20T19:48:35.014410Z",
+      "updated_at": "2026-09-20T19:52:16.715002Z",
+      "questions": [
+        {
+          "question": "What happens if a user resets their Proton Account password without using their recovery phrase?",
+          "options": [
+            "All account data is permanently deleted automatically.",
+            "The user will regain full access to all historical data.",
+            "Data existing on the account prior to the reset stays locked.",
+            "Proton support will be required to manually unlock the files."
+          ],
+          "correct_index": 2,
+          "explanation": "The text explicitly states that if you reset your password without the recovery phrase, anything on your account before the reset will remain locked.",
+          "difficulty": "easy"
+        },
+        {
+          "question": "Why is it impossible for Proton employees to access a user's data when they are locked out?",
+          "options": [
+            "Because Proton's high-level security technology prevents anyone from accessing it without the password or recovery phrase.",
+            "Because Proton permanently deletes user data after three failed login attempts.",
+            "Because Proton legally prohibits its staff from viewing user files.",
+            "Because user data is stored entirely offline on local physical devices."
+          ],
+          "correct_index": 0,
+          "explanation": "The text notes that Proton's high-level security technology means nobody (not even them) can access your data without your password or recovery phrase.",
+          "difficulty": "medium"
+        },
+        {
+          "question": "Which of the following is specifically advised against when choosing a method for digital storage of your recovery phrase?",
+          "options": [
+            "Printing a physical copy and keeping it in a home safe.",
+            "Using an encrypted password manager or cloud storage.",
+            "Using Proton Pass or Proton Drive for this specific file.",
+            "Writing the phrase down on a piece of paper."
+          ],
+          "correct_index": 2,
+          "explanation": "The text recommends encrypted password managers or cloud storage, but explicitly warns *against* using Proton Drive or Proton Pass for the recovery phrase because you cannot access Proton services if you are locked out.",
+          "difficulty": "hard"
+        },
+        {
+          "question": "What is the primary function of a recovery phrase in a Proton Account?",
+          "options": [
+            "To automatically generate a new password every 30 days.",
+            "To sign in and recover your data if you happen to get locked out.",
+            "To share your account securely with trusted family members.",
+            "To encrypt your outgoing emails and documents."
+          ],
+          "correct_index": 1,
+          "explanation": "The text defines the recovery phrase as the tool to use to sign in and recover your data if you get locked out of your Proton Account.",
+          "difficulty": "easy"
+        },
+        {
+          "question": "Based on the recommendations provided in the text, what is the safest approach for storing a recovery phrase digitally?",
+          "options": [
+            "Saving it as an unencrypted text file on your desktop for quick access.",
+            "Emailing it to your personal alternative email address.",
+            "Using an encrypted password manager or cloud storage (excluding Proton services).",
+            "Posting it in a private folder on a social media platform."
+          ],
+          "correct_index": 2,
+          "explanation": "The text states that for digital storage, you should try an encrypted password manager or cloud storage, while avoiding Proton's own services for this particular use case.",
+          "difficulty": "medium"
+        }
+      ],
+      "answers": [
+        1,
+        3,
+        0,
+        1,
+        0
+      ],
+      "score": {
+        "correct": 1,
+        "total": 5,
+        "percentage": 20
+      },
+      "completed": true
+    },
+    {
+      "id": "286ea87b092a",
+      "title": "Tailwind CSS Animation Guide",
+      "content": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n/* ═══════════════════════════════════════════════════════\n   QUIZ RESULT — Celebration Animations\n   ═══════════════════════════════════════════════════════ */\n\n/* Confetti falling animation */\n@keyframes confetti {\n  0% {\n    transform: translateY(0) rotate(0deg);\n    opacity: 1;\n  }\n  100% {\n    transform: translateY(100vh) rotate(720deg);\n    opacity: 0;\n  }\n}\n\n.animate-confetti {\n  animation: confetti linear forwards;\n}\n\n/* Fade in from bottom */\n@keyframes fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(20px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n.animate-fadeIn {\n  animation: fadeIn 0.6s ease-out;\n}\n\n/* Scale in with bounce (for trophy + title) */\n@keyframes scaleIn {\n  0% {\n    transform: scale(0.5);\n    opacity: 0;\n  }\n  50% {\n    transform: scale(1.1);\n  }\n  100% {\n    transform: scale(1);\n    opacity: 1;\n  }\n}\n\n.animate-scaleIn {\n  animation: scaleIn 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);\n}\n\n/* ═══════════════════════════════════════════════════════\n   SCROLLBAR — Custom styling (optional, for polish)\n   ═══════════════════════════════════════════════════════ */\n\n::-webkit-scrollbar {\n  width: 8px;\n  height: 8px;\n}\n\n::-webkit-scrollbar-track {\n  background: #f1f5f9;\n  border-radius: 4px;\n}\n\n::-webkit-scrollbar-thumb {\n  background: #cbd5e1;\n  border-radius: 4px;\n}\n\n::-webkit-scrollbar-thumb:hover {\n  background: #94a3b8;\n}",
+      "content_preview": "@tailwind base; @tailwind components; @tailwind utilities;  /* ═══════════════════════════════════════════════════════    QUIZ RESULT — Celebration Animations    ══════════════════════════════════════",
+      "source": "pasted",
+      "num_questions": 5,
+      "created_at": "2026-09-20T19:55:48.466629Z",
+      "updated_at": "2026-09-20T20:02:26.708921Z",
+      "questions": [
+        {
+          "question": "Which Tailwind CSS directives appear at the very beginning of the provided code?",
+          "options": [
+            "@keyframes and @animation",
+            "@tailwind base, components, and utilities",
+            ":-webkit-scrollbar styling rules",
+            "import statements for animations"
+          ],
+          "correct_index": 1,
+          "explanation": "The text starts with the three standard Tailwind CSS directives: @tailwind base;, @tailwind components;, and @tailwind utilities;.",
+          "difficulty": "easy"
+        },
+        {
+          "question": "What visual transformation occurs during the 'animate-confetti' keyframe animation from start to finish?",
+          "options": [
+            "It scales from 0.5 to 1 with a bounce effect",
+            "It moves upward by 20 pixels and fades in",
+            "It moves down the entire viewport height while rotating 720 degrees and fading out",
+            "It changes its background color from light gray to dark slate"
+          ],
+          "correct_index": 2,
+          "explanation": "The confetti keyframes animate translateY(0) to translateY(100vh), rotate(0deg) to rotate(720deg), and opacity 1 to 0.",
+          "difficulty": "medium"
+        },
+        {
+          "question": "Which CSS animation utilizes a cubic-bezier timing function to create a bounce effect by overshooting its target size?",
+          "options": [
+            "animate-confetti",
+            "animate-fadeIn",
+            "animate-scaleIn",
+            "::-webkit-scrollbar"
+          ],
+          "correct_index": 2,
+          "explanation": "animate-scaleIn uses scale(1.1) at 50% and a cubic-bezier(0.68, -0.55, 0.265, 1.55) timing function to achieve the bouncy scale-in effect.",
+          "difficulty": "medium"
+        },
+        {
+          "question": "How does the 'animate-fadeIn' animation modify the element's vertical position and opacity over its 0.6s duration?",
+          "options": [
+            "Starts shifted down 20px with 0 opacity and moves to 0px offset with full opacity",
+            "Starts at full opacity and scales down to half its size",
+            "Falls from 100vh down to 0vh with a linear timing curve",
+            "Bounces between -55px and 265px offset"
+          ],
+          "correct_index": 0,
+          "explanation": "fadeIn transitions from opacity: 0 and transform: translateY(20px) to opacity: 1 and transform: translateY(0).",
+          "difficulty": "hard"
+        },
+        {
+          "question": "What is the defined width and border-radius of the custom scrollbar thumb track based on the stylesheet?",
+          "options": [
+            "Width is 4px with a 8px border-radius",
+            "Width is 8px with a 4px border-radius",
+            "Width is 100vh with a 0px border-radius",
+            "Width is not specified; only the color #f1f5f9 is defined"
+          ],
+          "correct_index": 1,
+          "explanation": "Both the scrollbar width/height are set to 8px, and both the track and thumb elements use a border-radius of 4px.",
+          "difficulty": "easy"
+        }
+      ],
+      "answers": [
+        1,
+        2,
+        0,
+        2,
+        0
+      ],
+      "score": {
+        "correct": 2,
+        "total": 5,
+        "percentage": 40
+      },
+      "completed": true
+    },
+    {
+      "id": "15dfa4e70fef",
+      "title": "React Quiz Page Component",
+      "content": "import React, { useState, useRef, useEffect } from 'react'\nimport { useTranslation } from 'react-i18next'\nimport { API_BASE } from '../api'\nimport QuizCard from '../components/QuizCard'\nimport QuizResult from '../components/QuizResult'\nimport QuizHistory from '../components/QuizHistory'\n\nfunction QuizPage() {\n  const { t, i18n } = useTranslation()\n\n  // Input state\n  const [mode, setMode] = useState('paste')\n  const [contextText, setContextText] = useState('')\n  const [numQuestions, setNumQuestions] = useState(5)\n  const [source, setSource] = useState('pasted')\n  const [fileName, setFileName] = useState('')\n\n  // Loading & error\n  const [loading, setLoading] = useState(false)\n  const [error, setError] = useState('')\n\n  // Quiz state\n  const [questions, setQuestions] = useState([])\n  const [currentIndex, setCurrentIndex] = useState(0)\n  const [answers, setAnswers] = useState([])\n  const [showResult, setShowResult] = useState(false)\n  const [currentSessionId, setCurrentSessionId] = useState(null)\n  const [finalScore, setFinalScore] = useState(null)\n\n  // History sidebar\n  const [showHistory, setShowHistory] = useState(false)\n  const [historyKey, setHistoryKey] = useState(0)\n\n  const fileInputRef = useRef(null)\n\n  // ─────────────────────────────────────────────\n  // On mount: reset to input view\n  // ─────────────────────────────────────────────\n  useEffect(() => {\n    setQuestions([])\n    setAnswers([])\n    setCurrentIndex(0)\n    setShowResult(false)\n    setFinalScore(null)\n    setCurrentSessionId(null)\n  }, [])\n\n  // Auto-save answers to backend as user progresses\n  useEffect(() => {\n    if (currentSessionId && answers.length > 0) {\n      fetch(`${API_BASE}/quiz/history/${currentSessionId}/answers`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({ answers }),\n      }).catch((err) => console.error('Auto-save failed:', err))\n    }\n  }, [answers, currentSessionId])\n\n  // ─────────────────────────────────────────────\n  // PDF Upload handler\n  // ─────────────────────────────────────────────\n  const handlePdfUpload = async (e) => {\n    const file = e.target.files?.[0]\n    if (!file) return\n\n    if (!file.name.toLowerCase().endsWith('.pdf')) {\n      setError('Only PDF files are supported')\n      return\n    }\n\n    setLoading(true)\n    setError('')\n\n    try {\n      const formData = new FormData()\n      formData.append('file', file)\n\n      const res = await fetch(`${API_BASE}/upload`, {\n        method: 'POST',\n        body: formData,\n      })\n\n      const data = await res.json()\n      if (data.status !== 'success') {\n        throw new Error(data.message || 'Upload failed')\n      }\n\n      const text = data.full_text || data.abstract || ''\n      setContextText(text)\n      setSource('uploaded')\n      setFileName(file.name)\n      setMode('paste')\n    } catch (err) {\n      setError(err.message)\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Start quiz\n  // ─────────────────────────────────────────────\n  const startQuiz = async () => {\n    if (!contextText.trim()) {\n      setError(t('quizContextRequired'))\n      return\n    }\n\n    setLoading(true)\n    setError('')\n    setQuestions([])\n    setAnswers([])\n    setCurrentIndex(0)\n    setShowResult(false)\n    setFinalScore(null)\n\n    try {\n      const res = await fetch(`${API_BASE}/quiz`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          context_text: contextText,\n          num_questions: numQuestions,\n          lang: i18n.language,\n          source: source,\n        }),\n      })\n\n      const data = await res.json()\n\n      if (data.questions && data.questions.length > 0) {\n        setQuestions(data.questions)\n        setAnswers(new Array(data.questions.length).fill(null))\n        setCurrentSessionId(data.session_id || null)\n        setHistoryKey((k) => k + 1)\n      } else {\n        setError(data.error || t('quizGenerateFailed'))\n      }\n    } catch (err) {\n      console.error('Quiz error:', err)\n      setError(err.message)\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Answer handling\n  // ─────────────────────────────────────────────\n  const handleAnswer = (optionIndex) => {\n    const newAnswers = [...answers]\n    newAnswers[currentIndex] = optionIndex\n    setAnswers(newAnswers)\n  }\n\n  const goNext = () => {\n    if (currentIndex < questions.length - 1) {\n      setCurrentIndex(currentIndex + 1)\n    } else {\n      finishQuiz()\n    }\n  }\n\n  const goPrev = () => {\n    if (currentIndex > 0) {\n      setCurrentIndex(currentIndex - 1)\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Finish quiz — save score\n  // ─────────────────────────────────────────────\n  const finishQuiz = async () => {\n    const correctCount = questions.reduce((acc, q, idx) => {\n      return acc + (answers[idx] === q.correct_index ? 1 : 0)\n    }, 0)\n    const total = questions.length\n    const percentage = Math.round((correctCount / total) * 100)\n\n    setFinalScore({\n      correct: correctCount,\n      total: total,\n      percentage: percentage,\n    })\n    setShowResult(true)\n\n    if (currentSessionId) {\n      try {\n        await fetch(`${API_BASE}/quiz/history/${currentSessionId}/score`, {\n          method: 'POST',\n          headers: { 'Content-Type': 'application/json' },\n          body: JSON.stringify({ correct: correctCount, total: total }),\n        })\n        setHistoryKey((k) => k + 1)\n      } catch (err) {\n        console.error('Score save failed:', err)\n      }\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Restart — go back to input view\n  // ─────────────────────────────────────────────\n  const restartQuiz = () => {\n    setQuestions([])\n    setAnswers([])\n    setCurrentIndex(0)\n    setShowResult(false)\n    setFinalScore(null)\n    setCurrentSessionId(null)\n    setError('')\n    setContextText('')\n    setFileName('')\n    setSource('pasted')\n    setMode('paste')\n  }\n\n  // ─────────────────────────────────────────────\n  // Load a session from history\n  // ─────────────────────────────────────────────\n  const handleSelectSession = async (sessionId) => {\n    try {\n      const res = await fetch(`${API_BASE}/quiz/history/${sessionId}`)\n      const session = await res.json()\n\n      if (!session || !session.questions) {\n        setError('Failed to load session')\n        return\n      }\n\n      setQuestions(session.questions)\n      setAnswers(session.answers || new Array(session.questions.length).fill(null))\n      setCurrentIndex(0)\n      setShowResult(session.completed || false)\n      setCurrentSessionId(session.id)\n      setFinalScore(session.score || null)\n      setContextText(session.content || '')\n      setSource(session.source || 'pasted')\n      setNumQuestions(session.num_questions || session.questions.length)\n      setError('')\n\n      if (window.innerWidth < 1024) {\n        setShowHistory(false)\n      }\n    } catch (err) {\n      console.error('Load session failed:', err)\n      setError('Failed to load session')\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // HISTORY SIDEBAR COMPONENT (Reusable)\n  // ─────────────────────────────────────────────\n  const HistorySidebar = () => (\n    <>\n      <div\n        className={`fixed top-0 right-0 h-screen w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${\n          showHistory ? 'translate-x-0' : 'translate-x-full'\n        }`}\n      >\n        <div className=\"flex items-center justify-between p-4 border-b bg-gray-50\">\n          <h3 className=\"font-bold text-gray-800 text-sm\">📚 Quiz History</h3>\n          <button\n            onClick={() => setShowHistory(false)}\n            className=\"text-gray-500 hover:text-red-500 text-lg px-2 transition font-bold\"\n          >\n            ✕\n          </button>\n        </div>\n        <div\n          className=\"p-4 overflow-y-auto\"\n          style={{ height: 'calc(100vh - 60px)' }}\n        >\n          <QuizHistory\n            refreshKey={historyKey}\n            onSelectSession={handleSelectSession}\n          />\n        </div>\n      </div>\n\n      {showHistory && (\n        <div\n          onClick={() => setShowHistory(false)}\n          className=\"fixed inset-0 bg-black bg-opacity-30 z-40\"\n        />\n      )}\n    </>\n  )\n\n  // ═══════════════════════════════════════════════\n  // VIEW 1: INPUT VIEW (no quiz started)\n  // ═══════════════════════════════════════════════\n  if (questions.length === 0) {\n    return (\n      <div className=\"p-6 max-w-7xl mx-auto relative\">\n        <div className=\"mb-6 flex items-center justify-between flex-wrap gap-3\">\n          <div>\n            <h1 className=\"text-2xl font-bold text-gray-800\">\n              🎯 {t('navQuiz')}\n            </h1>\n            <p className=\"text-sm text-gray-500 mt-1\">\n              {t('quizPageSubtitle')}\n            </p>\n          </div>\n\n          <button\n            onClick={() => setShowHistory(!showHistory)}\n            className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition shadow-sm ${\n              showHistory\n                ? 'bg-blue-500 text-white border-blue-500'\n                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600'\n            }`}\n          >\n            📚 Quiz History\n            <span className=\"text-xs opacity-70\">\n              {showHistory ? '✕' : '→'}\n            </span>\n          </button>\n        </div>\n\n        <HistorySidebar />\n\n        <div className=\"max-w-3xl mx-auto\">\n          {error && (\n            <div className=\"mb-4 px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm\">\n              {error}\n            </div>\n          )}\n\n          <div className=\"bg-white border rounded-2xl p-6 shadow-sm\">\n            {/* Mode toggle */}\n            <div className=\"flex gap-2 mb-5\">\n              <button\n                onClick={() => setMode('paste')}\n                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${\n                  mode === 'paste'\n                    ? 'bg-blue-500 text-white'\n                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'\n                }`}\n              >\n                📝 {t('chatPasteText')}\n              </button>\n              <button\n                onClick={() => setMode('upload')}\n                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${\n                  mode === 'upload'\n                    ? 'bg-blue-500 text-white'\n                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'\n                }`}\n              >\n                📎 {t('chatUploadPdf')}\n              </button>\n            </div>\n\n            {/* Paste mode */}\n            {mode === 'paste' && (\n              <>\n                <label className=\"block text-sm font-semibold text-gray-700 mb-2\">\n                  📝 {t('quizPasteText')}\n                </label>\n                <textarea\n                  value={contextText}\n                  onChange={(e) => {\n                    setContextText(e.target.value)\n                    setSource('pasted')\n                  }}\n                  placeholder={t('quizPastePlaceholder')}\n                  rows=\"12\"\n                  className=\"w-full px-4 py-3 border rounded-lg mb-4 text-sm font-mono\"\n                />\n              </>\n            )}\n\n            {/* Upload mode */}\n            {mode === 'upload' && (\n              <div className=\"mb-4\">\n                <label className=\"block w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition\">\n                  <input\n                    ref={fileInputRef}\n                    type=\"file\"\n                    accept=\".pdf\"\n                    onChange={handlePdfUpload}\n                    className=\"hidden\"\n                  />\n                  <p className=\"text-4xl mb-2\">📎</p>\n                  <p className=\"text-sm font-medium text-gray-700\">\n                    {loading\n                      ? '⏳ ' + t('chatUploading')\n                      : t('chatClickToUpload')}\n                  </p>\n                  <p className=\"text-xs text-gray-500 mt-1\">\n                    {t('chatPdfOnly')}\n                  </p>\n                </label>\n\n                {fileName && (\n                  <div className=\"mt-3 px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700\">\n                    ✅ Loaded: {fileName}\n                  </div>\n                )}\n              </div>\n            )}\n\n            {/* Number of questions */}\n            <div className=\"flex items-center gap-4 mb-4\">\n              <label className=\"text-sm font-semibold text-gray-700\">\n                {t('quizNumQuestions')}:\n              </label>\n              <select\n                value={numQuestions}\n                onChange={(e) => setNumQuestions(Number(e.target.value))}\n                className=\"px-3 py-1.5 border rounded-lg text-sm bg-white cursor-pointer\"\n              >\n                <option value={5}>5</option>\n                <option value={10}>10</option>\n                <option value={15}>15</option>\n                <option value={20}>20</option>\n                <option value={30}>30</option>\n                <option value={50}>50</option>\n              </select>\n              <span className=\"text-xs text-gray-500\">(max 50)</span>\n            </div>\n\n            {/* Generate button */}\n            <button\n              onClick={startQuiz}\n              disabled={loading || !contextText.trim()}\n              className=\"w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium shadow-sm transition\"\n            >\n              {loading\n                ? '⏳ ' + t('quizGenerating')\n                : '🎯 ' + t('quizGenerate')}\n            </button>\n          </div>\n\n          <div className=\"mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4\">\n            <h3 className=\"text-sm font-bold text-gray-800 mb-1\">\n              💡 {t('quizQuickTip')}\n            </h3>\n            <p className=\"text-xs text-gray-600\">{t('quizQuickTipDesc')}</p>\n          </div>\n        </div>\n      </div>\n    )\n  }\n\n  // ═══════════════════════════════════════════════\n  // VIEW 2: RESULT VIEW\n  // ═══════════════════════════════════════════════\n  if (showResult && finalScore) {\n    return (\n      <div className=\"p-6 max-w-3xl mx-auto relative\">\n        <div className=\"mb-6 flex items-center justify-between\">\n          <h1 className=\"text-2xl font-bold text-gray-800\">\n            🎯 {t('quizResults')}\n          </h1>\n          <button\n            onClick={() => setShowHistory(!showHistory)}\n            className=\"text-xs px-3 py-1.5 rounded-lg border border-gray-300 hover:border-blue-400 transition\"\n          >\n            📚 History\n          </button>\n        </div>\n\n        <QuizResult\n          questions={questions}\n          answers={answers}\n          score={finalScore}\n          onRestart={restartQuiz}\n        />\n\n        {/* Single \"View History\" link below */}\n        <div className=\"mt-6 text-center\">\n          <button\n            onClick={() => setShowHistory(true)}\n            className=\"text-sm text-gray-500 hover:text-blue-600 underline transition\"\n          >\n            📚 View Quiz History\n          </button>\n        </div>\n\n        <HistorySidebar />\n      </div>\n    )\n  }\n\n  // ═══════════════════════════════════════════════\n  // VIEW 3: QUESTION VIEW\n  // ═══════════════════════════════════════════════\n  const currentQuestion = questions[currentIndex]\n  const isAnswered =\n    answers[currentIndex] !== null && answers[currentIndex] !== undefined\n  const isLastQuestion = currentIndex === questions.length - 1\n\n  return (\n    <div className=\"p-6 max-w-3xl mx-auto\">\n      {/* Progress bar */}\n      <div className=\"mb-6\">\n        <div className=\"flex justify-between text-xs text-gray-600 mb-2\">\n          <span>\n            {t('quizProgress')}: {currentIndex + 1}/{questions.length}\n          </span>\n          <span>\n            {Math.round(((currentIndex + 1) / questions.length) * 100)}%\n          </span>\n        </div>\n        <div className=\"w-full bg-gray-200 rounded-full h-2 overflow-hidden\">\n          <div\n            className=\"bg-blue-500 h-full transition-all duration-300\"\n            style={{\n              width: `${((currentIndex + 1) / questions.length) * 100}%`,\n            }}\n          />\n        </div>\n      </div>\n\n      {/* Question card */}\n      <QuizCard\n        question={currentQuestion}\n        index={currentIndex}\n        total={questions.length}\n        selectedIndex={answers[currentIndex]}\n        onSelect={handleAnswer}\n      />\n\n      {/* Navigation */}\n      <div className=\"mt-6 flex justify-between items-center\">\n        <button\n          onClick={goPrev}\n          disabled={currentIndex === 0}\n          className=\"px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition\"\n        >\n          ← {t('quizPrev')}\n        </button>\n\n        <button\n          onClick={goNext}\n          disabled={!isAnswered}\n          className=\"px-6 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-40 shadow-sm transition\"\n        >\n          {isLastQuestion ? '📊 ' + t('quizSeeResult') : t('quizNext') + ' →'}\n        </button>\n      </div>\n    </div>\n  )\n}\n\nexport default QuizPage",
+      "content_preview": "import React, { useState, useRef, useEffect } from 'react' import { useTranslation } from 'react-i18next' import { API_BASE } from '../api' import QuizCard from '../components/QuizCard' import QuizRes",
+      "source": "pasted",
+      "num_questions": 5,
+      "created_at": "2026-09-20T20:02:54.869234Z",
+      "updated_at": "2026-09-20T20:27:33.775881Z",
+      "questions": [
+        {
+          "question": "What is the primary action performed by the useEffect hook on component mount in the QuizPage component?",
+          "options": [
+            "It fetches the quiz history from the backend",
+            "It resets quiz state parameters like questions, answers, and scores",
+            "It automatically uploads any pasted text to the API",
+            "It triggers the PDF upload handler"
+          ],
+          "correct_index": 1,
+          "explanation": "The useEffect hook with an empty dependency array executes on mount to reset state values such as questions, answers, currentIndex, showResult, finalScore, and currentSessionId."
+        },
+        {
+          "question": "Which file format restriction is explicitly enforced when handling file uploads in the application?",
+          "options": [
+            "Text (.txt) files only",
+            "Word (.docx) files only",
+            "PDF (.pdf) files only",
+            "JSON (.json) files only"
+          ],
+          "correct_index": 2,
+          "explanation": "The handlePdfUpload function checks if the file name ends with '.pdf' and sets an error message if it does not, ensuring only PDF files are supported."
+        },
+        {
+          "question": "What mechanism is used to automatically save user answers as they progress through the quiz?",
+          "options": [
+            "A manual save button that the user must click",
+            "An automatic backend fetch triggered whenever answers or currentSessionId change",
+            "Local browser storage saving on every click",
+            "Periodic polling every 30 seconds"
+          ],
+          "correct_index": 1,
+          "explanation": "A useEffect hook monitors the 'answers' and 'currentSessionId' variables and executes a POST request to update the backend history whenever changes occur."
+        },
+        {
+          "question": "How does the application determine when a user is allowed to proceed to the next question or finish the quiz?",
+          "options": [
+            "The user must click the next button after a mandatory 10-second timer",
+            "The next button is only enabled if the current question has been answered",
+            "The quiz advances automatically as soon as any option is hovered",
+            "There are no restrictions; users can skip any question without answering"
+          ],
+          "correct_index": 1,
+          "explanation": "The navigation button's disabled state relies on '!isAnswered', which checks if answers[currentIndex] is neither null nor undefined."
+        },
+        {
+          "question": "What happens when a user finishes the quiz?",
+          "options": [
+            "The application immediately redirects to the home dashboard",
+            "The final score is calculated, displayed via the result view, and sent to the backend if a session ID exists",
+            "The session is deleted from the database permanently",
+            "The quiz restarts from question one automatically"
+          ],
+          "correct_index": 1,
+          "explanation": "The finishQuiz function calculates the correct count and percentage, sets the final score state to display results, and posts the score to the backend server if a valid currentSessionId is present."
+        }
+      ],
+      "answers": [
+        1,
+        2,
+        0,
+        2,
+        0
+      ],
+      "score": {
+        "correct": 2,
+        "total": 5,
+        "percentage": 40
+      },
+      "completed": true
+    },
+    {
+      "id": "16cdbf68dce3",
+      "title": "React Quiz Page Component",
+      "content": "import React, { useState, useRef, useEffect } from 'react'\nimport { useTranslation } from 'react-i18next'\nimport { API_BASE } from '../api'\nimport QuizCard from '../components/QuizCard'\nimport QuizResult from '../components/QuizResult'\nimport QuizHistory from '../components/QuizHistory'\n\nfunction QuizPage() {\n  const { t, i18n } = useTranslation()\n\n  // Input state\n  const [mode, setMode] = useState('paste')\n  const [contextText, setContextText] = useState('')\n  const [numQuestions, setNumQuestions] = useState(5)\n  const [source, setSource] = useState('pasted')\n  const [fileName, setFileName] = useState('')\n\n  // Loading & error\n  const [loading, setLoading] = useState(false)\n  const [error, setError] = useState('')\n\n  // Quiz state\n  const [questions, setQuestions] = useState([])\n  const [currentIndex, setCurrentIndex] = useState(0)\n  const [answers, setAnswers] = useState([])\n  const [showResult, setShowResult] = useState(false)\n  const [currentSessionId, setCurrentSessionId] = useState(null)\n  const [finalScore, setFinalScore] = useState(null)\n\n  // History sidebar\n  const [showHistory, setShowHistory] = useState(false)\n  const [historyKey, setHistoryKey] = useState(0)\n\n  const fileInputRef = useRef(null)\n\n  // ─────────────────────────────────────────────\n  // On mount: reset to input view\n  // ─────────────────────────────────────────────\n  useEffect(() => {\n    setQuestions([])\n    setAnswers([])\n    setCurrentIndex(0)\n    setShowResult(false)\n    setFinalScore(null)\n    setCurrentSessionId(null)\n  }, [])\n\n  // Auto-save answers to backend as user progresses\n  useEffect(() => {\n    if (currentSessionId && answers.length > 0) {\n      fetch(`${API_BASE}/quiz/history/${currentSessionId}/answers`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({ answers }),\n      }).catch((err) => console.error('Auto-save failed:', err))\n    }\n  }, [answers, currentSessionId])\n\n  // ─────────────────────────────────────────────\n  // PDF Upload handler\n  // ─────────────────────────────────────────────\n  const handlePdfUpload = async (e) => {\n    const file = e.target.files?.[0]\n    if (!file) return\n\n    if (!file.name.toLowerCase().endsWith('.pdf')) {\n      setError('Only PDF files are supported')\n      return\n    }\n\n    setLoading(true)\n    setError('')\n\n    try {\n      const formData = new FormData()\n      formData.append('file', file)\n\n      const res = await fetch(`${API_BASE}/upload`, {\n        method: 'POST',\n        body: formData,\n      })\n\n      const data = await res.json()\n      if (data.status !== 'success') {\n        throw new Error(data.message || 'Upload failed')\n      }\n\n      const text = data.full_text || data.abstract || ''\n      setContextText(text)\n      setSource('uploaded')\n      setFileName(file.name)\n      setMode('paste')\n    } catch (err) {\n      setError(err.message)\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Start quiz\n  // ─────────────────────────────────────────────\n  const startQuiz = async () => {\n    if (!contextText.trim()) {\n      setError(t('quizContextRequired'))\n      return\n    }\n\n    setLoading(true)\n    setError('')\n    setQuestions([])\n    setAnswers([])\n    setCurrentIndex(0)\n    setShowResult(false)\n    setFinalScore(null)\n\n    try {\n      const res = await fetch(`${API_BASE}/quiz`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          context_text: contextText,\n          num_questions: numQuestions,\n          lang: i18n.language,\n          source: source,\n        }),\n      })\n\n      const data = await res.json()\n\n      if (data.questions && data.questions.length > 0) {\n        setQuestions(data.questions)\n        setAnswers(new Array(data.questions.length).fill(null))\n        setCurrentSessionId(data.session_id || null)\n        setHistoryKey((k) => k + 1)\n      } else {\n        setError(data.error || t('quizGenerateFailed'))\n      }\n    } catch (err) {\n      console.error('Quiz error:', err)\n      setError(err.message)\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Answer handling\n  // ─────────────────────────────────────────────\n  const handleAnswer = (optionIndex) => {\n    const newAnswers = [...answers]\n    newAnswers[currentIndex] = optionIndex\n    setAnswers(newAnswers)\n  }\n\n  const goNext = () => {\n    if (currentIndex < questions.length - 1) {\n      setCurrentIndex(currentIndex + 1)\n    } else {\n      finishQuiz()\n    }\n  }\n\n  const goPrev = () => {\n    if (currentIndex > 0) {\n      setCurrentIndex(currentIndex - 1)\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Finish quiz — save score\n  // ─────────────────────────────────────────────\n  const finishQuiz = async () => {\n    const correctCount = questions.reduce((acc, q, idx) => {\n      return acc + (answers[idx] === q.correct_index ? 1 : 0)\n    }, 0)\n    const total = questions.length\n    const percentage = Math.round((correctCount / total) * 100)\n\n    setFinalScore({\n      correct: correctCount,\n      total: total,\n      percentage: percentage,\n    })\n    setShowResult(true)\n\n    if (currentSessionId) {\n      try {\n        await fetch(`${API_BASE}/quiz/history/${currentSessionId}/score`, {\n          method: 'POST',\n          headers: { 'Content-Type': 'application/json' },\n          body: JSON.stringify({ correct: correctCount, total: total }),\n        })\n        setHistoryKey((k) => k + 1)\n      } catch (err) {\n        console.error('Score save failed:', err)\n      }\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // Restart — go back to input view\n  // ─────────────────────────────────────────────\n  const restartQuiz = () => {\n    setQuestions([])\n    setAnswers([])\n    setCurrentIndex(0)\n    setShowResult(false)\n    setFinalScore(null)\n    setCurrentSessionId(null)\n    setError('')\n    setContextText('')\n    setFileName('')\n    setSource('pasted')\n    setMode('paste')\n  }\n\n  // ─────────────────────────────────────────────\n  // Load a session from history\n  // ─────────────────────────────────────────────\n  const handleSelectSession = async (sessionId) => {\n    try {\n      const res = await fetch(`${API_BASE}/quiz/history/${sessionId}`)\n      const session = await res.json()\n\n      if (!session || !session.questions) {\n        setError('Failed to load session')\n        return\n      }\n\n      setQuestions(session.questions)\n      setAnswers(session.answers || new Array(session.questions.length).fill(null))\n      setCurrentIndex(0)\n      setShowResult(session.completed || false)\n      setCurrentSessionId(session.id)\n      setFinalScore(session.score || null)\n      setContextText(session.content || '')\n      setSource(session.source || 'pasted')\n      setNumQuestions(session.num_questions || session.questions.length)\n      setError('')\n\n      if (window.innerWidth < 1024) {\n        setShowHistory(false)\n      }\n    } catch (err) {\n      console.error('Load session failed:', err)\n      setError('Failed to load session')\n    }\n  }\n\n  // ─────────────────────────────────────────────\n  // HISTORY SIDEBAR COMPONENT (Reusable)\n  // ─────────────────────────────────────────────\n  const HistorySidebar = () => (\n    <>\n      <div\n        className={`fixed top-0 right-0 h-screen w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${\n          showHistory ? 'translate-x-0' : 'translate-x-full'\n        }`}\n      >\n        <div className=\"flex items-center justify-between p-4 border-b bg-gray-50\">\n          <h3 className=\"font-bold text-gray-800 text-sm\">📚 Quiz History</h3>\n          <button\n            onClick={() => setShowHistory(false)}\n            className=\"text-gray-500 hover:text-red-500 text-lg px-2 transition font-bold\"\n          >\n            ✕\n          </button>\n        </div>\n        <div\n          className=\"p-4 overflow-y-auto\"\n          style={{ height: 'calc(100vh - 60px)' }}\n        >\n          <QuizHistory\n            refreshKey={historyKey}\n            onSelectSession={handleSelectSession}\n          />\n        </div>\n      </div>\n\n      {showHistory && (\n        <div\n          onClick={() => setShowHistory(false)}\n          className=\"fixed inset-0 bg-black bg-opacity-30 z-40\"\n        />\n      )}\n    </>\n  )\n\n  // ═══════════════════════════════════════════════\n  // VIEW 1: INPUT VIEW (no quiz started)\n  // ═══════════════════════════════════════════════\n  if (questions.length === 0) {\n    return (\n      <div className=\"p-6 max-w-7xl mx-auto relative\">\n        <div className=\"mb-6 flex items-center justify-between flex-wrap gap-3\">\n          <div>\n            <h1 className=\"text-2xl font-bold text-gray-800\">\n              🎯 {t('navQuiz')}\n            </h1>\n            <p className=\"text-sm text-gray-500 mt-1\">\n              {t('quizPageSubtitle')}\n            </p>\n          </div>\n\n          <button\n            onClick={() => setShowHistory(!showHistory)}\n            className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition shadow-sm ${\n              showHistory\n                ? 'bg-blue-500 text-white border-blue-500'\n                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600'\n            }`}\n          >\n            📚 Quiz History\n            <span className=\"text-xs opacity-70\">\n              {showHistory ? '✕' : '→'}\n            </span>\n          </button>\n        </div>\n\n        <HistorySidebar />\n\n        <div className=\"max-w-3xl mx-auto\">\n          {error && (\n            <div className=\"mb-4 px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm\">\n              {error}\n            </div>\n          )}\n\n          <div className=\"bg-white border rounded-2xl p-6 shadow-sm\">\n            {/* Mode toggle */}\n            <div className=\"flex gap-2 mb-5\">\n              <button\n                onClick={() => setMode('paste')}\n                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${\n                  mode === 'paste'\n                    ? 'bg-blue-500 text-white'\n                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'\n                }`}\n              >\n                📝 {t('chatPasteText')}\n              </button>\n              <button\n                onClick={() => setMode('upload')}\n                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${\n                  mode === 'upload'\n                    ? 'bg-blue-500 text-white'\n                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'\n                }`}\n              >\n                📎 {t('chatUploadPdf')}\n              </button>\n            </div>\n\n            {/* Paste mode */}\n            {mode === 'paste' && (\n              <>\n                <label className=\"block text-sm font-semibold text-gray-700 mb-2\">\n                  📝 {t('quizPasteText')}\n                </label>\n                <textarea\n                  value={contextText}\n                  onChange={(e) => {\n                    setContextText(e.target.value)\n                    setSource('pasted')\n                  }}\n                  placeholder={t('quizPastePlaceholder')}\n                  rows=\"12\"\n                  className=\"w-full px-4 py-3 border rounded-lg mb-4 text-sm font-mono\"\n                />\n              </>\n            )}\n\n            {/* Upload mode */}\n            {mode === 'upload' && (\n              <div className=\"mb-4\">\n                <label className=\"block w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition\">\n                  <input\n                    ref={fileInputRef}\n                    type=\"file\"\n                    accept=\".pdf\"\n                    onChange={handlePdfUpload}\n                    className=\"hidden\"\n                  />\n                  <p className=\"text-4xl mb-2\">📎</p>\n                  <p className=\"text-sm font-medium text-gray-700\">\n                    {loading\n                      ? '⏳ ' + t('chatUploading')\n                      : t('chatClickToUpload')}\n                  </p>\n                  <p className=\"text-xs text-gray-500 mt-1\">\n                    {t('chatPdfOnly')}\n                  </p>\n                </label>\n\n                {fileName && (\n                  <div className=\"mt-3 px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700\">\n                    ✅ Loaded: {fileName}\n                  </div>\n                )}\n              </div>\n            )}\n\n            {/* Number of questions */}\n            <div className=\"flex items-center gap-4 mb-4\">\n              <label className=\"text-sm font-semibold text-gray-700\">\n                {t('quizNumQuestions')}:\n              </label>\n              <select\n                value={numQuestions}\n                onChange={(e) => setNumQuestions(Number(e.target.value))}\n                className=\"px-3 py-1.5 border rounded-lg text-sm bg-white cursor-pointer\"\n              >\n                <option value={5}>5</option>\n                <option value={10}>10</option>\n                <option value={15}>15</option>\n                <option value={20}>20</option>\n                <option value={30}>30</option>\n                <option value={50}>50</option>\n              </select>\n              <span className=\"text-xs text-gray-500\">(max 50)</span>\n            </div>\n\n            {/* Generate button */}\n            <button\n              onClick={startQuiz}\n              disabled={loading || !contextText.trim()}\n              className=\"w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium shadow-sm transition\"\n            >\n              {loading\n                ? '⏳ ' + t('quizGenerating')\n                : '🎯 ' + t('quizGenerate')}\n            </button>\n          </div>\n\n          <div className=\"mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4\">\n            <h3 className=\"text-sm font-bold text-gray-800 mb-1\">\n              💡 {t('quizQuickTip')}\n            </h3>\n            <p className=\"text-xs text-gray-600\">{t('quizQuickTipDesc')}</p>\n          </div>\n        </div>\n      </div>\n    )\n  }\n\n  // ═══════════════════════════════════════════════\n  // VIEW 2: RESULT VIEW\n  // ═══════════════════════════════════════════════\n  if (showResult && finalScore) {\n    return (\n      <div className=\"p-6 max-w-3xl mx-auto relative\">\n        <div className=\"mb-4 flex items-center justify-between\">\n          <h1 className=\"text-xl font-bold text-gray-800\">\n            🎯 {t('quizResults')}\n          </h1>\n          <button\n            onClick={() => setShowHistory(!showHistory)}\n            className=\"text-xs px-3 py-1.5 rounded-lg border border-gray-300 hover:border-blue-400 transition\"\n          >\n            📚 History\n          </button>\n        </div>\n\n        <QuizResult\n          questions={questions}\n          answers={answers}\n          score={finalScore}\n          onRestart={restartQuiz}\n          onViewHistory={() => setShowHistory(true)}\n        />\n\n        <HistorySidebar />\n      </div>\n    )\n  }\n\n  // ═══════════════════════════════════════════════\n  // VIEW 3: QUESTION VIEW\n  // ═══════════════════════════════════════════════\n  const currentQuestion = questions[currentIndex]\n  const isAnswered =\n    answers[currentIndex] !== null && answers[currentIndex] !== undefined\n  const isLastQuestion = currentIndex === questions.length - 1\n\n  return (\n    <div className=\"p-6 max-w-3xl mx-auto\">\n      {/* Progress bar */}\n      <div className=\"mb-6\">\n        <div className=\"flex justify-between text-xs text-gray-600 mb-2\">\n          <span>\n            {t('quizProgress')}: {currentIndex + 1}/{questions.length}\n          </span>\n          <span>\n            {Math.round(((currentIndex + 1) / questions.length) * 100)}%\n          </span>\n        </div>\n        <div className=\"w-full bg-gray-200 rounded-full h-2 overflow-hidden\">\n          <div\n            className=\"bg-blue-500 h-full transition-all duration-300\"\n            style={{\n              width: `${((currentIndex + 1) / questions.length) * 100}%`,\n            }}\n          />\n        </div>\n      </div>\n\n      {/* Question card */}\n      <QuizCard\n        question={currentQuestion}\n        index={currentIndex}\n        total={questions.length}\n        selectedIndex={answers[currentIndex]}\n        onSelect={handleAnswer}\n      />\n\n      {/* Navigation */}\n      <div className=\"mt-6 flex justify-between items-center\">\n        <button\n          onClick={goPrev}\n          disabled={currentIndex === 0}\n          className=\"px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition\"\n        >\n          ← {t('quizPrev')}\n        </button>\n\n        <button\n          onClick={goNext}\n          disabled={!isAnswered}\n          className=\"px-6 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-40 shadow-sm transition\"\n        >\n          {isLastQuestion ? '📊 ' + t('quizSeeResult') : t('quizNext') + ' →'}\n        </button>\n      </div>\n    </div>\n  )\n}\n\nexport default QuizPage",
+      "content_preview": "import React, { useState, useRef, useEffect } from 'react' import { useTranslation } from 'react-i18next' import { API_BASE } from '../api' import QuizCard from '../components/QuizCard' import QuizRes",
+      "source": "pasted",
+      "num_questions": 10,
+      "created_at": "2026-09-20T20:25:33.611820Z",
+      "updated_at": "2026-09-20T20:26:24.015986Z",
+      "questions": [
+        {
+          "question": "Which React hook is used in the text to manage component references like the file input element?",
+          "options": [
+            "useEffect",
+            "useState",
+            "useRef",
+            "useTranslation"
+          ],
+          "correct_index": 2,
+          "explanation": "useRef is imported and initialized as `fileInputRef = useRef(null)` to reference the file input element."
+        },
+        {
+          "question": "What is the initial default value of the `mode` state variable when the QuizPage component mounts?",
+          "options": [
+            "upload",
+            "paste",
+            "history",
+            "result"
+          ],
+          "correct_index": 1,
+          "explanation": "The text initializes `const [mode, setMode] = useState('paste')`."
+        },
+        {
+          "question": "When a user uploads a file, what file extension is explicitly validated by the `handlePdfUpload` function?",
+          "options": [
+            ".docx",
+            ".txt",
+            ".pdf",
+            ".json"
+          ],
+          "correct_index": 2,
+          "explanation": "The code checks `if (!file.name.toLowerCase().endsWith('.pdf'))` to ensure only PDF files are supported."
+        },
+        {
+          "question": "What triggers the auto-save functionality for quiz answers in the background?",
+          "options": [
+            "When the user clicks the 'Next' button",
+            "Every time the history sidebar opens",
+            "When currentSessionId exists and answers.length > 0",
+            "When the component initially mounts"
+          ],
+          "correct_index": 2,
+          "explanation": "A useEffect hook monitors `[answers, currentSessionId]` and automatically triggers a fetch request to save answers if `currentSessionId && answers.length > 0`."
+        },
+        {
+          "question": "What happens when the `useEffect` hook with an empty dependency array `[]` runs on component mount?",
+          "options": [
+            "It fetches the quiz history from the API",
+            "It resets questions, answers, currentIndex, showResult, finalScore, and currentSessionId",
+            "It automatically starts a new 5-question quiz",
+            "It sets the default language to English"
+          ],
+          "correct_index": 1,
+          "explanation": "The mount useEffect clears out the quiz state arrays and resets variables like currentIndex, showResult, finalScore, and currentSessionId."
+        },
+        {
+          "question": "What is the maximum number of questions a user can select from the dropdown menu in the input view?",
+          "options": [
+            "20",
+            "30",
+            "50",
+            "100"
+          ],
+          "correct_index": 2,
+          "explanation": "The dropdown options include 5, 10, 15, 20, 30, and 50, accompanied by a label stating '(max 50)'."
+        },
+        {
+          "question": "How is the final quiz score percentage calculated inside the `finishQuiz` function?",
+          "options": [
+            "Multiplying correct answers by 10",
+            "Math.round((correctCount / total) * 100)",
+            "Dividing total questions by correct answers",
+            "Adding correct answers to the total and dividing by 2"
+          ],
+          "correct_index": 1,
+          "explanation": "The percentage is calculated via `Math.round((correctCount / total) * 100)`."
+        },
+        {
+          "question": "What happens when a user clicks the 'Next' button on the last question of the quiz (`isLastQuestion` is true)?",
+          "options": [
+            "It loops back to the first question",
+            "It restarts the entire quiz",
+            "It calls the `finishQuiz` function",
+            "It closes the quiz page"
+          ],
+          "correct_index": 2,
+          "explanation": "Inside `goNext()`, if `currentIndex < questions.length - 1` is false (meaning it's the last question), it calls `finishQuiz()`."
+        },
+        {
+          "question": "Under what condition is the 'Generate' button disabled in the input view?",
+          "options": [
+            "When mode is set to 'upload'",
+            "When loading is true or contextText is empty/whitespace only",
+            "When the history sidebar is open",
+            "When numQuestions is greater than 10"
+          ],
+          "correct_index": 1,
+          "explanation": "The button uses the condition `disabled={loading || !contextText.trim()}`."
+        },
+        {
+          "question": "How does the application respond if an uploaded file does not end with the allowed extension?",
+          "options": [
+            "It ignores the file silently",
+            "It automatically converts the file to PDF",
+            "It sets an error message state reading 'Only PDF files are supported'",
+            "It forces the mode back to paste text"
+          ],
+          "correct_index": 2,
+          "explanation": "The `handlePdfUpload` function sets `setError('Only PDF files are supported')` when the extension check fails."
+        }
+      ],
+      "answers": [
+        0,
+        1,
+        2,
+        0,
+        3,
+        1,
+        0,
+        2,
+        3,
+        2
+      ],
+      "score": {
+        "correct": 4,
+        "total": 10,
+        "percentage": 40
+      },
+      "completed": true
+    },
+    {
+      "id": "20b39966a5ec",
+      "title": "Proton Recovery Phrase Guide",
+      "content": "Recovery kit Recovery phrase If you get locked out of your Proton Account, use this phrase to sign in and recover your data. Password If you want, write down your password to help you remember. Why do I need a recovery phrase? Proton’s high-level security technology means that nobody (not even us) can access your data without your password or your recovery phrase. So it’s important to keep your recovery phrase somewhere safe and accessible. If you reset your password without it, anything on your account before the reset will remain locked. Safe storage tips « If you can, it’s best to write down or print a copy of your recovery phrase, and store it in a safe, or wherever you keep important documents « For digital storage, try an encrypted password manager or cloud storage. We usually recommend Proton Drive or Proton Pass, but not this time—you won’t be able to access any of our services if you get locked out. Need help? Get in touch at . proton.me/support/contact swachharesearch@proton.me Created on September 10th, 2026 install ribbon sick mimic mechanic goddess logic describe column toe soda start",
+      "content_preview": "Recovery kit Recovery phrase If you get locked out of your Proton Account, use this phrase to sign in and recover your data. Password If you want, write down your password to help you remember. Why do",
+      "source": "uploaded",
+      "num_questions": 5,
+      "created_at": "2026-09-21T07:30:46.002563Z",
+      "updated_at": "2026-09-21T07:31:19.492402Z",
+      "questions": [
+        {
+          "question": "What is the primary function of a recovery phrase in a Proton Account?",
+          "options": [
+            "To change your username and profile picture",
+            "To sign in and recover your data if you get locked out",
+            "To automatically generate a strong password",
+            "To share account access with trusted family members"
+          ],
+          "correct_index": 1,
+          "explanation": "The text states that if you get locked out of your Proton Account, you can use the recovery phrase to sign in and recover your data.",
+          "difficulty": "easy"
+        },
+        {
+          "question": "Why is it impossible for Proton employees to access a user's data when they lose their password?",
+          "options": [
+            "Because Proton does not store user emails",
+            "Because Proton's high-level security technology prevents anyone from accessing data without the password or recovery phrase",
+            "Because Proton's servers automatically delete accounts after a lockout",
+            "Because legal regulations prohibit Proton from viewing user files"
+          ],
+          "correct_index": 1,
+          "explanation": "Proton's high-level security technology means that nobody (not even Proton) can access your data without your password or recovery phrase.",
+          "difficulty": "medium"
+        },
+        {
+          "question": "What happens to your existing account data if you reset your password without using your recovery phrase?",
+          "options": [
+            "It is permanently deleted from Proton's servers",
+            "It is automatically migrated to a temporary backup account",
+            "Anything on your account before the reset will remain locked",
+            "It becomes immediately accessible without any further steps"
+          ],
+          "correct_index": 2,
+          "explanation": "The text explicitly notes that if you reset your password without the recovery phrase, anything on your account before the reset will remain locked.",
+          "difficulty": "medium"
+        },
+        {
+          "question": "When storing a Proton recovery phrase digitally, why does the text advise *against* using Proton Pass or Proton Drive?",
+          "options": [
+            "Because these services do not support encryption for recovery phrases",
+            "Because you will not be able to access any of Proton's services if you get locked out",
+            "Because Proton services are too expensive to use for backups",
+            "Because Proton automatically deletes recovery phrases stored in their own apps"
+          ],
+          "correct_index": 1,
+          "explanation": "While Proton Drive and Proton Pass are usually recommended for digital storage, they should not be used here because you won't be able to access Proton services if you are locked out.",
+          "difficulty": "hard"
+        },
+        {
+          "question": "Which of the following methods is suggested as a physical storage option for your recovery phrase?",
+          "options": [
+            "Writing it on a sticky note attached to your computer monitor",
+            "Saving it in a draft of an unencrypted email",
+            "Writing it down or printing a copy and storing it in a safe",
+            "Reciting it to a customer support representative via phone"
+          ],
+          "correct_index": 2,
+          "explanation": "The text advises that it's best to write down or print a copy of your recovery phrase, and store it in a safe or wherever you keep important documents.",
+          "difficulty": "easy"
+        }
+      ],
+      "answers": [
+        0,
+        2,
+        2,
+        3,
+        0
+      ],
+      "score": {
+        "correct": 1,
+        "total": 5,
+        "percentage": 20
+      },
+      "completed": true
+    },
+    {
+      "id": "aae134ad409a",
+      "title": "Machine Learning Fundamentals Guide",
+      "content": "Machine learning is a branch of Artificial Intelligence that focuses on developing models and algorithms that let computers learn from data without being explicitly programmed for every task. In simple words, ML teaches systems to think and understand like humans by learning from the data.\nModule 1: ML Fundamentals\nThis section introduces the core concepts of machine learning and explains how ML relates to AI and Deep Learning.\n\nIntroduction\nAI vs ML vs Deep Learning\nML workflow\nModule 2: Python for ML\nPython is widely used in machine learning because of its simple syntax and powerful libraries.\n\nIntroduction\nVariables\nData Types\nOperators\nConditional Statements\nLoops\nFunctions\nLists\nDictionary\nLibraries: NumPy, Pandas, Matplotlib, Seaborn, Scikit-learn\nModule 3: Mathematics for ML\nA basic understanding of mathematics helps explain how machine learning algorithms learn from data and optimize their performance.\n\nProbability\nBasic probability\nConditional Probability\nBayes' Theorem\nProbability distributions\nStatistics\nDescriptive Statistics\nInferential Statistics\nSkewness and Kurtosis\nCorrelation: Pearson, Spearman\nLinear Algebra & Calculus\nVectors\nMatrices\nDot Product\nlinear equations\nDifferentiation\nGradient Descent\nModule 4: Data Preparation\nReal-world data is often incomplete or inconsistent and needs to be prepared before modeling. This section covers data cleaning, splitting, scaling and feature preparation techniques.\n\nIntroduction\nData Cleaning\nMissing Values\nOutliers\nSplitting Data \nFeature Selection\nFeature Scaling\nFeature Engineering\nFeature Extraction",
+      "content_preview": "Machine learning is a branch of Artificial Intelligence that focuses on developing models and algorithms that let computers learn from data without being explicitly programmed for every task. In simpl",
+      "source": "pasted",
+      "num_questions": 15,
+      "created_at": "2026-09-22T06:39:20.450960Z",
+      "updated_at": "2026-09-22T06:39:25.609712Z",
+      "questions": [
+        {
+          "question": "What is the primary focus of machine learning according to the text?",
+          "options": [
+            "Explicitly programming computers for every single task",
+            "Developing models and algorithms that let computers learn from data",
+            "Replacing human thought processes entirely with hardware",
+            "Creating graphical user interfaces for AI applications"
+          ],
+          "correct_index": 1,
+          "explanation": "Machine learning focuses on developing models and algorithms that let computers learn from data without being explicitly programmed for every task."
+        },
+        {
+          "question": "Which module serves as the direct precursor to understanding how ML algorithms learn and optimize their performance through math?",
+          "options": [
+            "Module 1: ML Fundamentals",
+            "Module 2: Python for ML",
+            "Module 3: Mathematics for ML",
+            "Module 4: Data Preparation"
+          ],
+          "correct_index": 2,
+          "explanation": "Module 3 focuses on Mathematics for ML, which helps explain how algorithms learn from data and optimize their performance."
+        },
+        {
+          "question": "Why is Python widely used in machine learning?",
+          "options": [
+            "Because it is the only programming language that supports AI",
+            "Because of its simple syntax and powerful libraries",
+            "Because it requires no data preparation steps",
+            "Because it executes algorithms faster than any compiled language"
+          ],
+          "correct_index": 1,
+          "explanation": "Python is widely used in machine learning because of its simple syntax and powerful libraries."
+        },
+        {
+          "question": "If a real-world dataset is incomplete or inconsistent, which module's topics should be applied first before modeling?",
+          "options": [
+            "Module 1",
+            "Module 2",
+            "Module 3",
+            "Module 4"
+          ],
+          "correct_index": 3,
+          "explanation": "Module 4 covers Data Preparation, which specifically addresses incomplete or inconsistent real-world data through cleaning, splitting, scaling, and feature preparation."
+        },
+        {
+          "question": "In Module 3, which mathematical concept is paired directly with optimization under Calculus and Linear Algebra?",
+          "options": [
+            "Bayes' Theorem",
+            "Gradient Descent",
+            "Pearson Correlation",
+            "Descriptive Statistics"
+          ],
+          "correct_index": 1,
+          "explanation": "Gradient Descent is listed under Linear Algebra & Calculus in Module 3."
+        },
+        {
+          "question": "Which of the following libraries are explicitly listed under Python for ML in Module 2?",
+          "options": [
+            "TensorFlow, PyTorch, Keras",
+            "NumPy, Pandas, Matplotlib, Seaborn, Scikit-learn",
+            "React, Django, Flask",
+            "SciPy, Statsmodels, NLTK"
+          ],
+          "correct_index": 1,
+          "explanation": "Module 2 lists NumPy, Pandas, Matplotlib, Seaborn, and Scikit-learn as the Python libraries for ML."
+        },
+        {
+          "question": "How does machine learning relate to artificial intelligence based on the curriculum structure?",
+          "options": [
+            "ML is a branch of Artificial Intelligence",
+            "AI is a subset of Machine Learning",
+            "ML and AI are completely unrelated fields",
+            "Deep learning is a replacement for AI"
+          ],
+          "correct_index": 0,
+          "explanation": "The text states that machine learning is a branch of Artificial Intelligence."
+        },
+        {
+          "question": "Which statistical and probabilistic concepts are covered in Module 3?",
+          "options": [
+            "Only descriptive statistics and vectors",
+            "Basic probability, Conditional Probability, Bayes' Theorem, and probability distributions",
+            "Calculus, matrices, and dot products",
+            "Data cleaning and missing values"
+          ],
+          "correct_index": 1,
+          "explanation": "Module 3 covers basic probability, conditional probability, Bayes' Theorem, and probability distributions under the probability section."
+        },
+        {
+          "question": "What is the role of feature selection and feature scaling in the ML workflow?",
+          "options": [
+            "They are part of data preparation before modeling",
+            "They are Python programming loops",
+            "They are methods of calculating descriptive statistics",
+            "They are used to write conditional statements"
+          ],
+          "correct_index": 0,
+          "explanation": "Feature selection and feature scaling are part of Module 4 (Data Preparation) used to prepare real-world data before modeling."
+        },
+        {
+          "question": "Which of the following topics belongs to Python control flow and data structures rather than libraries?",
+          "options": [
+            "NumPy",
+            "Conditional Statements, Loops, Lists, and Dictionary",
+            "Pandas",
+            "Scikit-learn"
+          ],
+          "correct_index": 1,
+          "explanation": "Conditional statements, loops, lists, and dictionaries are fundamental programming constructs covered in Module 2."
+        },
+        {
+          "question": "Why is data preparation necessary according to the text?",
+          "options": [
+            "Because Python libraries cannot read raw data",
+            "Because real-world data is often incomplete or inconsistent",
+            "Because models cannot run without gradient descent",
+            "Because mathematical optimization requires scaled data"
+          ],
+          "correct_index": 1,
+          "explanation": "Real-world data is often incomplete or inconsistent and needs to be prepared before modeling."
+        },
+        {
+          "question": "Which correlation methods are specifically named under the Statistics section in Module 3?",
+          "options": [
+            "Euclidean and Manhattan",
+            "Pearson and Spearman",
+            "Gradient and Derivative",
+            "Descriptive and Inferential"
+          ],
+          "correct_index": 1,
+          "explanation": "Pearson and Spearman correlation methods are listed under the Statistics section in Module 3."
+        },
+        {
+          "question": "What does Module 1 primarily introduce?",
+          "options": [
+            "Advanced deep learning architectures",
+            "Core concepts of machine learning and how ML relates to AI and Deep Learning",
+            "Python syntax and libraries",
+            "Data cleaning and missing values"
+          ],
+          "correct_index": 1,
+          "explanation": "Module 1 introduces the core concepts of machine learning and explains how ML relates to AI and Deep Learning."
+        },
+        {
+          "question": "Which of the following pairs are both found under the Statistics heading in Module 3?",
+          "options": [
+            "Vectors and Matrices",
+            "Descriptive Statistics and Inferential Statistics",
+            "Variables and Data Types",
+            "Data Cleaning and Outliers"
+          ],
+          "correct_index": 1,
+          "explanation": "Descriptive Statistics and Inferential Statistics are both listed under the Statistics heading in Module 3."
+        },
+        {
+          "question": "Which step in Module 4 deals specifically with handling incomplete data points?",
+          "options": [
+            "Missing Values",
+            "Feature Engineering",
+            "Splitting Data",
+            "Feature Extraction"
+          ],
+          "correct_index": 0,
+          "explanation": "Missing values are addressed during data cleaning under Module 4 to handle incomplete data."
+        }
+      ],
+      "answers": [
+        0,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "score": null,
+      "completed": false
+    },
+    {
+      "id": "462f3d218155",
+      "title": "Machine Learning Basics",
+      "content": "Machine learning is a branch of Artificial Intelligence that focuses on developing models and algorithms that let computers learn from data without being explicitly programmed for every task. In simple words, ML teaches systems to think and understand like humans by learning from the data.",
+      "content_preview": "Machine learning is a branch of Artificial Intelligence that focuses on developing models and algorithms that let computers learn from data without being explicitly programmed for every task. In simpl",
+      "source": "pasted",
+      "num_questions": 5,
+      "created_at": "2026-09-22T07:49:39.090662Z",
+      "updated_at": "2026-09-22T07:50:52.043255Z",
+      "questions": [
+        {
+          "question": "What is the primary focus of machine learning according to the text?",
+          "options": [
+            "Replacing human intelligence entirely with robotic systems",
+            "Developing models and algorithms that allow computers to learn from data",
+            "Explicitly programming computers for every possible task",
+            "Creating hardware that mimics the human brain physically"
+          ],
+          "correct_index": 1,
+          "explanation": "The text states that machine learning focuses on developing models and algorithms that let computers learn from data.",
+          "difficulty": "easy"
+        },
+        {
+          "question": "How does machine learning differ from traditional explicit programming?",
+          "options": [
+            "ML requires human intervention for every individual decision made by the computer.",
+            "ML relies on hard-coded rules rather than data.",
+            "ML enables computers to learn from data instead of needing explicit instructions for every task.",
+            "ML is completely unrelated to Artificial Intelligence."
+          ],
+          "correct_index": 2,
+          "explanation": "Machine learning avoids the need to be explicitly programmed for every task by allowing systems to learn directly from data.",
+          "difficulty": "medium"
+        },
+        {
+          "question": "Which of the following best describes the relationship between machine learning and Artificial Intelligence based on the text?",
+          "options": [
+            "Machine learning is a subset or branch of Artificial Intelligence.",
+            "Artificial Intelligence is a specific type of machine learning algorithm.",
+            "They are two completely independent fields of computer science.",
+            "Artificial Intelligence is a branch that falls under machine learning."
+          ],
+          "correct_index": 0,
+          "explanation": "The text explicitly defines machine learning as \"a branch of Artificial Intelligence.\"",
+          "difficulty": "easy"
+        },
+        {
+          "question": "According to the text, what is the ultimate functional goal of teaching systems through machine learning?",
+          "options": [
+            "To increase the processing speed of computer hardware",
+            "To eliminate the need for data storage",
+            "To help systems think and understand like humans",
+            "To automate the creation of programming languages"
+          ],
+          "correct_index": 2,
+          "explanation": "The text notes that ML teaches systems to \"think and understand like humans by learning from the data.\"",
+          "difficulty": "medium"
+        },
+        {
+          "question": "Based on the provided text, which inference can be safely drawn about a computer program built using machine learning?",
+          "options": [
+            "It will always make decisions without any data input.",
+            "Its algorithms are capable of improving or adapting based on the data they process.",
+            "It contains explicit code for every possible scenario it will encounter.",
+            "It possesses human consciousness and emotions."
+          ],
+          "correct_index": 1,
+          "explanation": "Since ML allows computers to learn from data without explicit programming for every task, the system adapts and improves its understanding through data.",
+          "difficulty": "hard"
+        }
+      ],
+      "answers": [
+        1,
+        2,
+        3,
+        2,
+        3
+      ],
+      "score": {
+        "correct": 3,
+        "total": 5,
+        "percentage": 60
+      },
+      "completed": true
+    },
+    {
+      "id": "32a4c5fd9236",
+      "title": "Python PDF Fetching Configuration",
+      "content": "(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nimport inspect\nfrom app.services.coordinator_agent import (\n    _fetch_single_pdf, _parallel_fetch_full_text,\n    _PDF_TIMEOUT, _MAX_PDF_BYTES, run_pipeline\n)\nprint('✅ Imports OK')\nprint('_PDF_TIMEOUT:', _PDF_TIMEOUT)\nprint('_MAX_PDF_BYTES:', _MAX_PDF_BYTES // (1024*1024), 'MB')\nsig1 = inspect.signature(_fetch_single_pdf)\nsig2 = inspect.signature(_parallel_fetch_full_text)\nprint('_fetch_single_pdf timeout:', sig1.parameters['timeout'].d\"paper_timeout'].default)ll_text timeout:', sig2.parameters['per\n✅ Imports OK\n_PDF_TIMEOUT: 8.0\n_MAX_PDF_BYTES: 5 MB\n_fetch_single_pdf timeout: 8.0\n_parallel_fetch_full_text timeout: 8.0\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nimport time\nfrom app.services.coordinator_agent import run_pipeline\n\nstart = time.time()\nresult = run_pipeline('ML', '2020+ studies', 'en', limit=10)\nelapsed = time.time() - start\n\nprint()\nprint('=' * 60)\nprint(f'⏱️  TOTAL TIME: {elapsed:.2f} seconds')\nprint(f'📊 Papers: {result[\\\"counts\\\"][\\\"total_included\\\"]} incl\"vint('=' * 60)'  Paper {i}: methodology[{len(m)}ch] = {m}')s\\\"]\n[pipeline] 🔍 Searching papers...\n[search] Query expanded: 'ML' → 'ML machine learning machine-learning'\n[openalex] Found 10 papers\n[search] OpenAlex: 10 papers found\n[pipeline] ✅ Found 10 papers 10/10\n[pipeline] Skipping dedup (only 10 papers)\n[pipeline] Year threshold: 2020+\n[pipeline] Pre-filter: 7 excluded, 3 to AI\n[pipeline] 📥 Fetching full text for 3 papers... 0/3\n      📎 Unpaywall found PDF for 10.21275/art20203995\n      📎 Unpaywall found PDF for 10.1038/s42254-021-00314-5\n      📎 Unpaywall found PDF for 10.1007/s42979-021-00592-x\n      ⚠️ Machine Learning: Algorithms, Real-World: non-PDF response (HTML/error page)\n      ⚠️ Physics-informed machine learning: timeout (abstract fallback)\n      ⚠️ Machine Learning: Algorithms, Real-World: not_a_pdf_file (abstract fallback)\n      ✅ Machine Learning Algorithms - A Review: 4089 chars\n[pipeline] 🤖 Screening + extracting 3 papers... 3/3\n[pipeline] ✅ Validation passed\n[pipeline] ✅ Pipeline complete!\n[pipeline] Summary: 10 found | 0 dup | 7 excluded | 3 included\n\n============================================================\n⏱️  TOTAL TIME: 45.85 seconds\n📊 Papers: 3 included\n✅ Validation errors: 0\n  Paper 1: methodology[80ch] = Inferred: Survey and tutorial study reviewing the state-of-the-art methodologies\n  Paper 2: methodology[80ch] = Inferred: Comprehensive literature review analyzing existing machine learning al\n  Paper 3: methodology[80ch] = Inferred: Review study analyzingdifferent machine learning paradigms, specifica\n============================================================\nTraceback (most recent call last):\n  File \"<string>\", line 19, in <module>\nNameError: name 'v' is not defined\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nfrom app.services.gemini_client import (\n    _generate_session_title,\n    generate_quiz,\n    batch_screen_and_extract,\n    sanitize_ai_text,\n    merged_screen_and_extract,\n    chat_about_paper,\n    screen_paper,\n    quality_check_decision,\n    screen_papers_batch,\n    extract_papers_batch,\n\"rint('✅ ALL gemini_client imports OK')\n✅ ALL gemini_client imports OK\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ curl http://localhost:8000\n{\"status\":\"ok\",\"message\":\"ReviewMind API is running\"}(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"from app.services.report_generator import generate_word_report, _ensure_limitations, _get_source_short; print('✅ report_generator imports OK')\"\n✅ report_generator imports OK\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nimport time\nfrom app.services.coordinator_agent import run_pipeline\nfrom app.services.report_generator import generate_word_report\n\nstart = time.time()\nresult = run_pipeline('AI in ml', '2020+ studies', 'en', limit=10)\nelapsed = time.time() - start\n\nprint()\nprint(f'⏱️  Pipeline: {elapsed:.2f}s | Papers: {result[\\\"counts\\\"\"rint('=' * 60)Report: {report_path}')(]['included'],],licates_r\n[pipeline] 🔍 Searching papers...\n[search] Query expanded: 'AI in ml' → 'AI in ml artificial intelligence artificial-intelligence machine learning machine-learning'\n[openalex] Found 10 papers\n[search] OpenAlex: 10 papers found\n[pipeline] ✅ Found 10 papers 10/10\n[pipeline] Skipping dedup (only 10 papers)\n[pipeline] Year threshold: 2020+\n[pipeline] Pre-filter: 5 excluded, 5 to AI\n[pipeline] 📥 Fetching full text for 5 papers... 0/5\n      📎 Unpaywall found PDF for 10.3390/electronics13030498\n      📎 Unpaywall found PDF for 10.1016/j.cogr.2023.04.001\n      ⚠️ Unpaywall: 10.4230/lipics.itp.2023.19 not indexed\n      📎 Unpaywall found PDF for 10.1007/s42979-021-00592-x\n      📎 Unpaywall found PDF for 10.1016/j.procir.2020.04.109\n      ⚠️ Machine Learning: Algorithms, Real-World: non-PDF response (HTML/error page)\n      ⚠️ Artificial intelligence, machine learnin: non-PDF response (HTML/error page)\n      ⚠️ Machine Learning: Algorithms, Real-World: not_a_pdf_file (abstract fallback)\n      ⚠️ Exploiting Generative AI to Scale up Int: no_open_access_url (abstract fallback)\n      ⚠️ FDA-Approved Artificial Intelligence and: http_403_blocked (abstract fallback)\n      ⚠️ Artificial intelligence, machine learnin: not_a_pdf_file (abstract fallback)\n      ⚠️ Systematic review on machine learning (M: http_403_blocked (abstract fallback)\n[pipeline] 🤖 Screening + extracting 5 papers... 5/5\n[pipeline] ✅ Validation passed\n[pipeline] ✅ Pipeline complete!\n[pipeline] Summary: 10 found | 0 dup | 5 excluded | 5 included\n\n⏱️  Pipeline: 14.81s | Papers: 5 included\n[report] Generated: F:\\systematic-review-tool (1)\\systematic-review-tool\\backend\\app\\generated\\SLR_Report_EN_2e1dcfe4.docx\n📄 Report: F:\\systematic-review-tool (1)\\systematic-review-tool\\backend\\app\\generated\\SLR_Report_EN_2e1dcfe4.docx\n============================================================\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nfrom app.services.coordinator_agent import (\n    run_pipeline, _fetch_single_pdf, _parallel_fetch_full_text,\n    _get_unpaywall_pdf_url, _get_semantic_scholar_pdf_url,\n    _get_core_pdf_url, _get_pmc_pdf_url, _get_openalex_all_urls, \n    validate_counts,\n)\nprint('✅ ALL imports OK')\n\"\n✅ ALL imports OK\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nimport time\nfrom app.services.coordinator_agent import run_pipeline\n\nstart = time.time()\nresult = run_pipeline('AI in Public health', '2020+ studies', 'en', limit=10)\nelapsed = time.time() - start\n\nprint()\nprint('=' * 60)\nprint(f'⏱️  TOTAL TIME: {elapsed:.2f} seconds')\nprint(f'📊 Papers: {result[\\\"counts\\\"][\\\"total_included\\\"]} incl\"rint('=' * 60)aper {i} [{has_ft}]: method={m} | limit={l}')\n[pipeline] 🔍 Searching papers...\n[search] Query expanded: 'AI in Public health' → 'AI in Public health artificial intelligence artificial-intelligence'\n[openalex] Found 10 papers\n[search] OpenAlex: 10 papers found\n[pipeline] ✅ Found 10 papers 10/10\n[pipeline] Skipping dedup (only 10 papers)\n[pipeline] Year threshold: 2020+\n[pipeline] Pre-filter: 6 excluded, 4 to AI\n[pipeline] 📥 Fetching full text for 4 papers (multi-source)...0/4\n      🔍 Trying 2 source(s) for 'Revolutionizing healthcare: the role of '...\n      🔍 Trying 3 source(s) for 'The role of artificial intelligence in a'...\n      🔍 Trying 3 source(s) for 'Comparing Physician and Artificial Intel'...\n      ✅ The role of artificial intelligence in a: 2012 chars from source 2\n      🔍 Trying 2 source(s) for 'Explainability for artificial intelligen'...\n      ⚠️ Explainability for artificial intelligen: not_pdf_2 (abstract only)\n      ⚠️ Revolutionizing healthcare: the role of : not_pdf_2 (abstract only)\n      ⚠️ Comparing Physician and Artificial Intel: not_pdf_3 (abstract only)\n[pipeline] ✅ Full text fetched: 1/4 papers\n[pipeline] 🤖 Screening + extracting 4 papers... 4/4\n[pipeline] ✅ Validation passed\n[pipeline] ✅ Pipeline complete!\n[pipeline] Summary: 10 found | 0 dup | 6 excluded | 4 included\n\n============================================================\n⏱️  TOTAL TIME: 24.35 seconds\n📊 Papers: 4 included\n\nExtraction quality:\n  Paper 1 [ABS ]: method=The authors adopted a multidisciplinary  | limit=Not mentioned in the paper.\n  Paper 2 [ABS ]: method=Inferred: Systematic review and comprehe | limit=Not mentioned in the paper.\n  Paper 3 [FULL]: method=Inferred: Comprehensive literature revie | limit=Not mentioned in the paper.\n  Paper 4 [ABS ]: method=Inferred: Experimental cross-sectionals | limit=Not mentioned in the paper.\n============================================================\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && python -c \"\nimport time\nfrom app.services.coordinator_agent import run_pipeline\n\nstart = time.time()\nresult = run_pipeline('AI in Public health', '2020+ studies', 'en', limit=10)\nelapsed = time.time() - start\n\nprint()\nprint('=' * 60)\nprint(f'⏱️  TOTAL TIME: {elapsed:.2f} seconds')\nprint(f'📊 Papers: {result[\\\"counts\\\"][\\\"total_included\\\"]} incl\"rint('=' * 60)aper {i} [{has_ft}]: {l}') else 'ABS '1):\n[pipeline] 🔍 Searching papers...\n[search] Query expanded: 'AI in Public health' → 'AI in Public health artificial intelligence artificial-intelligence'\n[openalex] Found 10 papers\n[search] OpenAlex: 10 papers found\n[pipeline] ✅ Found 10 papers 10/10\n[pipeline] Skipping dedup (only 10 papers)\n[pipeline] Year threshold: 2020+\n[pipeline] Pre-filter: 6 excluded, 4 to AI\n[pipeline] 📥 Fetching full text for 4 papers (multi-source)...0/4\n      🔍 Trying 3 source(s) for 'The role of artificial intelligence in a'...\n      🔍 Trying 3 source(s) for 'Comparing Physician and Artificial Intel'...\n      🔍 Trying 2 source(s) for 'Explainability for artificial intelligen'...\n      🔍 Trying 2 source(s) for 'Revolutionizing healthcare: the role of '...\n      ✅ The role of artificial intelligence in a: 2012 chars from source 2\n      ⚠️ Explainability for artificial intelligen: not_pdf_2 (abstract only)\n      ⚠️ Revolutionizing healthcare: the role of : not_pdf_2 (abstract only)\n      ⚠️ Comparing Physician and Artificial Intel: not_pdf_3 (abstract only)\n[pipeline] ✅ Full text fetched: 1/4 papers\n[pipeline] 🤖 Screening + extracting 4 papers... 4/4\n[pipeline] ✅ Validation passed\n[pipeline] ✅ Pipeline complete!\n[pipeline] Summary: 10 found | 0 dup | 6 excluded | 4 included\n\n============================================================\n⏱️  TOTAL TIME: 19.85 seconds\n📊 Papers: 4 included\n\nExtraction quality (limitations):\n  Paper 1 [ABS ]: Inferred: The paper relies on conceptual analysis and ethical frameworks without empirical clinical \n  Paper 2 [ABS ]: Challenges related to data privacy, bias, andthe need for human expertise must be addressed for res\n  Paper 3 [FULL]: Inferred: The study provides a macro-level assessment across broad goals, potentially lacking granul\n  Paper 4 [ABS ]: The study analyzed a public social media forum rather than direct clinical interactions, and further\n============================================================\n(venv) \nIT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend\n$ ",
+      "content_preview": "(venv)  IT@DESKTOP-8994FRF MINGW64 /f/systematic-review-tool (1)/systematic-review-tool/backend $ cd \"/f/systematic-review-tool (1)/systematic-review-tool/backend\" && source venv/Scripts/activate && p",
+      "source": "pasted",
+      "num_questions": 5,
+      "created_at": "2026-09-22T21:17:01.968102Z",
+      "updated_at": "2026-09-22T21:17:02.302498Z",
+      "questions": [
+        {
+          "question": "What is the configured timeout value for _PDF_TIMEOUT in the backend application?",
+          "options": [
+            "5.0 seconds",
+            "8.0 seconds",
+            "10.0 seconds",
+            "14.81 seconds"
+          ],
+          "correct_index": 1,
+          "explanation": "The text explicitly states: `_PDF_TIMEOUT: 8.0` and `_fetch_single_pdf timeout: 8.0`."
+        },
+        {
+          "question": "What is the maximum allowed PDF size (_MAX_PDF_BYTES) configured in the backend?",
+          "options": [
+            "3 MB",
+            "5 MB",
+            "10 MB",
+            "50 MB"
+          ],
+          "correct_index": 1,
+          "explanation": "The output shows `_MAX_PDF_BYTES: 5 MB`."
+        },
+        {
+          "question": "When running the pipeline with the query 'AI in ml' with a limit of 10, how many papers were included after screening?",
+          "options": [
+            "3",
+            "4",
+            "5",
+            "10"
+          ],
+          "correct_index": 2,
+          "explanation": "The pipeline summary for 'AI in ml' states: `Summary: 10 found | 0 dup | 5 excluded | 5 included`."
+        },
+        {
+          "question": "What is the response returned when testing the root API endpoint via `curl http://localhost:8000`?",
+          "options": [
+            "{\"status\":\"error\",\"message\":\"API is offline\"}",
+            "{\"status\":\"ok\",\"message\":\"ReviewMind API is running\"}",
+            "{\"status\":\"running\",\"message\":\"Backend is active\"}",
+            "{\"status\":\"success\",\"message\":\"Connected\"}"
+          ],
+          "correct_index": 1,
+          "explanation": "The output displays the curl response as `{\"status\":\"ok\",\"message\":\"ReviewMind API is running\"}`."
+        },
+        {
+          "question": "When running the pipeline for the query 'AI in Public health', how many total papers were found by OpenAlex before filtering?",
+          "options": [
+            "3",
+            "4",
+            "6",
+            "10"
+          ],
+          "correct_index": 3,
+          "explanation": "The logs for 'AI in Public health' show `[openalex] Found 10 papers` and `Summary: 10 found`."
+        }
+      ],
+      "answers": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "score": null,
+      "completed": false
+    }
+  ]
+}

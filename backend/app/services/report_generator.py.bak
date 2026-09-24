@@ -3,15 +3,12 @@ Multi-Table Word Report Generator with Full Verification and Clickable Links.
 
 Fixes applied:
   • Verification steps rendered as separate numbered paragraphs (no merge)
-  • Table 2 source column shows arXiv / CR / OA / SS (no stray "0")
+  • Table 2 source column shows only "SS" or "OA" (no stray "0")
   • Clickable hyperlinks in tables, DOI/URL fields, and references
   • Sanitized text (no debug/QA notes)
   • "Not mentioned" for missing limitations (never "—")
   • Methodology can be "Inferred: ..." for overview papers
   • Clean page breaks (no orphan pages)
-  • Sources shown: arXiv, Crossref, OpenAlex, Semantic Scholar
-  • Table rows never split or duplicate on page boundaries
-    (uses cantSplit + keepNext + keepLines)
 """
 import os
 import re
@@ -28,39 +25,6 @@ from docx.oxml import OxmlElement
 from app.services.prisma_generator import OUTPUT_DIR
 
 
-# ─────────────────────────────────────────────────────────────
-# Display names for sources (single source of truth)
-# ─────────────────────────────────────────────────────────────
-_SOURCE_DISPLAY = {
-    "arxiv": "arXiv",
-    "crossref": "Crossref",
-    "openalex": "OpenAlex",
-    "semantic_scholar": "Semantic Scholar",
-}
-
-# Short badges for Table 2's "Source" column
-_SOURCE_SHORT = {
-    "arxiv": "arXiv",
-    "crossref": "CR",
-    "openalex": "OA",
-    "semantic_scholar": "SS",
-}
-
-
-def _display_source(source_key: str) -> str:
-    """Human-readable source name. Falls back to raw key if unknown."""
-    if not source_key:
-        return "—"
-    return _SOURCE_DISPLAY.get(source_key, source_key)
-
-
-def _short_source(source_key: str) -> str:
-    """Short badge for Table 2. Falls back to raw key if unknown."""
-    if not source_key:
-        return "—"
-    return _SOURCE_SHORT.get(source_key, source_key)
-
-
 LABELS = {
     "en": {
         "title": "Systematic Literature Review Report",
@@ -70,8 +34,7 @@ LABELS = {
         "verification_statement": "Verification Statement",
         "verification_text": (
             "This report contains data from real research papers "
-            "retrieved from verified academic APIs (arXiv, Crossref, "
-            "OpenAlex, Semantic Scholar). "
+            "retrieved from verified academic APIs (Semantic Scholar, OpenAlex). "
             "Every paper has a DOI link and verification URL for independent checking. "
             "AI-extracted data can be cross-verified against the original paper text "
             "in the appendices."
@@ -134,8 +97,8 @@ LABELS = {
         "verification_statement": "যাচাই বিবৃতি",
         "verification_text": (
             "এই রিপোর্টে থাকা তথ্য সত্যিকারের গবেষণাপত্র থেকে সংগ্রহ করা হয়েছে "
-            "(arXiv, Crossref, OpenAlex, Semantic Scholar)। প্রতিটি পেপারের DOI লিঙ্ক "
-            "এবং যাচাইয়ের URL আছে।"
+            "(Semantic Scholar, OpenAlex)। প্রতিটি পেপারের DOI লিঙ্ক এবং "
+            "যাচাইয়ের URL আছে।"
         ),
         "total_papers": "মোট পেপার",
         "sources_used": "ব্যবহৃত সোর্স",
@@ -277,7 +240,7 @@ def _set_table_fixed_layout(table):
 
 
 def _prevent_row_split(row):
-    """Prevent table row from splitting across pages (legacy helper)."""
+    """Prevent table row from splitting across pages."""
     tr = row._tr
     trPr = tr.get_or_add_trPr()
     existing = trPr.find(qn('w:cantSplit'))
@@ -285,45 +248,6 @@ def _prevent_row_split(row):
         trPr.remove(existing)
     cant_split = OxmlElement('w:cantSplit')
     trPr.append(cant_split)
-
-
-def _force_keep_row_together(row):
-    """
-    Force a table row to stay on one page and never duplicate on page
-    boundaries.
-
-    Uses three XML tags together:
-      1. w:cantSplit  — the row itself never splits across pages
-      2. w:keepNext   — the row stays next to the following one
-      3. w:keepLines  — paragraphs inside cells never split mid-page
-
-    Word/LibreOffice has a long-standing rendering bug where the last
-    row of a table can be DUPLICATED if it lands on a page break and
-    only cantSplit is set. Adding keepNext + keepLines prevents this.
-    """
-    tr = row._tr
-    trPr = tr.get_or_add_trPr()
-
-    # 1. cantSplit — never split a row across pages
-    existing = trPr.find(qn('w:cantSplit'))
-    if existing is not None:
-        trPr.remove(existing)
-    trPr.append(OxmlElement('w:cantSplit'))
-
-    # 2. keepNext + keepLines on every cell paragraph
-    for cell in row.cells:
-        for para in cell.paragraphs:
-            pPr = para._p.get_or_add_pPr()
-
-            existing_kn = pPr.find(qn('w:keepNext'))
-            if existing_kn is not None:
-                pPr.remove(existing_kn)
-            pPr.append(OxmlElement('w:keepNext'))
-
-            existing_kl = pPr.find(qn('w:keepLines'))
-            if existing_kl is not None:
-                pPr.remove(existing_kl)
-            pPr.append(OxmlElement('w:keepLines'))
 
 
 def _add_page_break_clean(doc):
@@ -434,12 +358,7 @@ def _add_key_hyperlink(doc, key, url, display_text=None, indent=0):
 
 
 def _add_table_from_rows(doc, headers, rows, col_widths=None, link_cols=None):
-    """
-    Create a table with optional clickable link columns.
-
-    Every row (header + data) is forced to never split and never duplicate
-    on page breaks via _force_keep_row_together().
-    """
+    """Create a table with optional clickable link columns."""
     if link_cols is None:
         link_cols = set()
 
@@ -459,7 +378,8 @@ def _add_table_from_rows(doc, headers, rows, col_widths=None, link_cols=None):
         run = p.add_run(cleaned_header)
         run.bold = True
         run.font.size = Pt(9)
-    _force_keep_row_together(table.rows[0])
+        p.paragraph_format.keep_with_next = True
+    _prevent_row_split(table.rows[0])
 
     # Data rows
     for row_data in rows:
@@ -484,9 +404,8 @@ def _add_table_from_rows(doc, headers, rows, col_widths=None, link_cols=None):
                 run.font.size = Pt(8)
 
             p.paragraph_format.word_wrap = True
-
-        # Prevent this row from splitting / duplicating on page break
-        _force_keep_row_together(row)
+            p.paragraph_format.keep_with_next = False
+        _prevent_row_split(row)
 
     if col_widths:
         _set_table_fixed_layout(table)
@@ -511,8 +430,13 @@ def _get_link(paper):
 
 
 def _get_source_short(paper):
-    """Return short source badge for Table 2 (arXiv, CR, OA, SS)."""
-    return _short_source(paper.get("source_api", ""))
+    """Return SS or OA (no stray characters)."""
+    source = paper.get("source_api", "")
+    if source == "semantic_scholar":
+        return "SS"
+    if source == "openalex":
+        return "OA"
+    return "—"
 
 
 def _get_author_year(paper):
@@ -567,12 +491,7 @@ def _add_verification_log(doc, paper, index, L):
 
     # Source Verification
     _add_paragraph(doc, L["source_verification"], size=11, bold=True)
-    _add_key_value(
-        doc,
-        L["api_source"],
-        _display_source(paper.get("source_api", "")),
-        indent=0.3,
-    )
+    _add_key_value(doc, L["api_source"], paper.get("source_api", "—"), indent=0.3)
 
     api_endpoint = paper.get("api_endpoint", "—")
     if api_endpoint and api_endpoint.startswith("http"):
@@ -751,19 +670,12 @@ def generate_word_report(
     _add_heading(doc, L["verification_statement"], level=1)
     _add_paragraph(doc, L["verification_text"], size=10)
 
-    # Count papers by source (all 4 sources)
-    arxiv_count = len([p for p in papers if p.get("source_api") == "arxiv"])
-    cr_count = len([p for p in papers if p.get("source_api") == "crossref"])
-    oa_count = len([p for p in papers if p.get("source_api") == "openalex"])
     ss_count = len([p for p in papers if p.get("source_api") == "semantic_scholar"])
+    oa_count = len([p for p in papers if p.get("source_api") == "openalex"])
 
     _add_key_value(doc, L["total_papers"], len(papers))
-    _add_key_value(
-        doc,
-        L["sources_used"],
-        f"arXiv: {arxiv_count}, Crossref: {cr_count}, "
-        f"OpenAlex: {oa_count}, Semantic Scholar: {ss_count}",
-    )
+    _add_key_value(doc, L["sources_used"],
+                   f"Semantic Scholar: {ss_count}, OpenAlex: {oa_count}")
     if papers:
         _add_key_value(doc, L["fetched_time"], papers[0].get("fetched_at", "—"))
     doc.add_paragraph()
@@ -806,7 +718,7 @@ def generate_word_report(
                 _get_author_year(p),
                 p.get("year", "—"),
                 _clean_text(p.get("venue", "")) or "—",
-                _get_source_short(p),
+                _get_source_short(p),  # Returns clean "SS" or "OA"
                 _get_link(p),
             ])
         _add_table_from_rows(
@@ -933,12 +845,10 @@ def generate_word_report(
                 url = p["url"]
                 _add_hyperlink(cite_p, url, url)
 
-            # Source line — use proper display name
-            _api_display = _display_source(p.get("source_api", ""))
             src_p = doc.add_paragraph()
             src_p.paragraph_format.left_indent = Inches(0.7)
             src_run = src_p.add_run(
-                f"   Source: {_api_display} | "
+                f"   Source: {p.get('source_api', '—')} | "
                 f"Fetched: {p.get('fetched_at', '—')} | Verify: "
             )
             src_run.italic = True

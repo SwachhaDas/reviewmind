@@ -1,0 +1,131 @@
+"""
+history_store.py — Generic, per-user-isolated history storage.
+
+Fixes the privacy bug: previously all sessions (chat/quiz/review/
+presentation) were stored in one shared JSON file with no user
+separation, so any visitor's History tab showed everyone's sessions.
+
+Every save/list/delete call now REQUIRES a user_id, and list/delete are
+always filtered to that user_id — no cross-user visibility is possible
+even if two people hit the same backend URL at the same time.
+
+UTF-8 encoding is explicitly used everywhere because Windows' default
+cp1252 codec fails on emoji, Bengali, or any non-ASCII character.
+"""
+
+import json
+import threading
+import time
+import uuid
+from pathlib import Path
+from typing import Optional
+
+
+# Data folder: backend/app/data/
+DATA_DIR = Path(__file__).parent.parent / "data"
+DATA_DIR.mkdir(exist_ok=True)
+
+
+class HistoryStore:
+    def __init__(self, filename: str):
+        self.path = DATA_DIR / filename
+        self._lock = threading.Lock()
+        if not self.path.exists():
+            self.path.write_text("[]", encoding="utf-8")
+
+    def _load(self) -> list:
+        try:
+            # encoding='utf-8' is CRITICAL on Windows — otherwise cp1252
+            # fails on emoji, Bengali, or any non-ASCII character.
+            raw = json.loads(self.path.read_text(encoding="utf-8"))
+            # Support both formats: { "sessions": [...] } and [ ... ]
+            if isinstance(raw, dict) and "sessions" in raw:
+                return raw["sessions"]
+            if isinstance(raw, list):
+                return raw
+            return []
+        except (json.JSONDecodeError, FileNotFoundError):
+            return []
+
+    def _save(self, sessions: list):
+        self.path.write_text(
+            json.dumps(sessions, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    def save_session(self, user_id: str, data: dict) -> dict:
+        """Saves a new session, stamped with user_id, session_id, and timestamp."""
+        if not user_id:
+            raise ValueError("user_id is required — refusing to save an unowned session.")
+
+        with self._lock:
+            sessions = self._load()
+            record = {
+                **data,
+                "session_id": data.get("session_id") or str(uuid.uuid4()),
+                "user_id": user_id,
+                "created_at": data.get("created_at") or time.time(),
+            }
+            # If this session_id already exists for this user, update in place
+            existing_idx = next(
+                (i for i, s in enumerate(sessions)
+                 if s.get("session_id") == record["session_id"]
+                 and s.get("user_id") == user_id),
+                None,
+            )
+            if existing_idx is not None:
+                sessions[existing_idx] = record
+            else:
+                sessions.append(record)
+            self._save(sessions)
+            return record
+
+    def list_sessions(self, user_id: str) -> list:
+        """Returns only sessions belonging to this user_id."""
+        if not user_id:
+            return []
+        sessions = self._load()
+        return [s for s in sessions if s.get("user_id") == user_id]
+
+    def get_session(self, user_id: str, session_id: str) -> Optional[dict]:
+        if not user_id:
+            return None
+        for s in self._load():
+            if s.get("session_id") == session_id and s.get("user_id") == user_id:
+                return s
+        return None
+
+    def delete_session(self, user_id: str, session_id: str) -> bool:
+        """Deletes a session ONLY if it belongs to this user_id."""
+        if not user_id:
+            return False
+        with self._lock:
+            sessions = self._load()
+            new_sessions = [
+                s for s in sessions
+                if not (s.get("session_id") == session_id
+                        and s.get("user_id") == user_id)
+            ]
+            deleted = len(new_sessions) != len(sessions)
+            if deleted:
+                self._save(new_sessions)
+            return deleted
+
+    def rename_session(self, user_id: str, session_id: str, new_title: str) -> bool:
+        if not user_id:
+            return False
+        with self._lock:
+            sessions = self._load()
+            for s in sessions:
+                if s.get("session_id") == session_id and s.get("user_id") == user_id:
+                    s["title"] = new_title
+                    self._save(sessions)
+                    return True
+            return False
+
+
+# ─── Shared instances per history type ───
+review_history_store = HistoryStore("review_history.json")
+chat_history_store = HistoryStore("chat_history.json")
+quiz_history_store = HistoryStore("quiz_history.json")
+presentation_history_store = HistoryStore("presentation_history.json")

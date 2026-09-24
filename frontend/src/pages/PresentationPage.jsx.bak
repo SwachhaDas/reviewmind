@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, PRESENTATION_ENDPOINTS, userHeaders, userJsonHeaders } from '../api'
+import { API_BASE, PRESENTATION_ENDPOINTS } from '../api'
 import SlidePreview from '../components/SlidePreview'
 
 function PresentationPage() {
@@ -38,9 +38,7 @@ function PresentationPage() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch(PRESENTATION_ENDPOINTS.history, {
-        headers: userHeaders(),
-      })
+      const res = await fetch(PRESENTATION_ENDPOINTS.history)
       const data = await res.json()
       if (data.status === 'success') {
         setHistoryItems(data.items || [])
@@ -116,7 +114,7 @@ function PresentationPage() {
     try {
       const res = await fetch(PRESENTATION_ENDPOINTS.generate, {
         method: 'POST',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: contentText,
           title: titleHint || null,
@@ -160,9 +158,7 @@ function PresentationPage() {
   // ─── Load session from history ───
   const handleSelectSession = async (id) => {
     try {
-      const res = await fetch(PRESENTATION_ENDPOINTS.session(id), {
-        headers: userHeaders(),
-      })
+      const res = await fetch(PRESENTATION_ENDPOINTS.session(id))
       const data = await res.json()
       if (data.status !== 'success') {
         setError(data.detail || 'Failed to load session')
@@ -196,10 +192,7 @@ function PresentationPage() {
       return
     }
     try {
-      await fetch(PRESENTATION_ENDPOINTS.delete(id), {
-        method: 'DELETE',
-        headers: userHeaders(),
-      })
+      await fetch(PRESENTATION_ENDPOINTS.delete(id), { method: 'DELETE' })
       if (id === sessionId) {
         setSlides([])
         setPresTitle('')
@@ -229,7 +222,7 @@ function PresentationPage() {
     try {
       await fetch(PRESENTATION_ENDPOINTS.title(id), {
         method: 'PATCH',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: editingTitle }),
       })
       setEditingId(null)
@@ -340,6 +333,8 @@ function PresentationPage() {
                         )}
                       </div>
                     </div>
+                    {/* Action buttons — always visible on mobile (no hover),
+                        hover-reveal on desktop. */}
                     <div className="flex flex-col gap-1 transition sm:opacity-0 sm:group-hover:opacity-100">
                       <button
                         onClick={(e) => startEdit(item, e)}
@@ -379,8 +374,11 @@ function PresentationPage() {
   if (slides.length > 0) {
     return (
       <div className="px-4 py-4 sm:px-6 sm:py-6 max-w-4xl mx-auto relative">
+        {/* Header */}
         <div className="mb-4 sm:mb-5 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
+            {/* line-clamp-2 lets long titles wrap on mobile instead of
+                being cut off by truncate. */}
             <h1 className="text-lg sm:text-xl font-bold text-gray-800 line-clamp-2 break-words">
               🎨 {presTitle}
             </h1>
@@ -390,6 +388,7 @@ function PresentationPage() {
               </p>
             )}
           </div>
+          {/* Buttons stretch to full width on xs, auto on sm+. */}
           <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto">
             <button
               onClick={handleReset}
@@ -408,6 +407,7 @@ function PresentationPage() {
 
         <HistorySidebar />
 
+        {/* Download buttons — stack on mobile */}
         <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5 justify-center">
           <button
             onClick={() => handleDownload(pptxUrl)}
@@ -439,6 +439,7 @@ function PresentationPage() {
   // ═══════════════════════════════════════════════
   return (
     <div className="px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto relative">
+      {/* Header */}
       <div className="mb-4 sm:mb-6 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
         <div className="flex-1 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
@@ -474,6 +475,8 @@ function PresentationPage() {
         )}
 
         <div className="bg-white border rounded-2xl p-4 sm:p-6 shadow-sm">
+          {/* Mode toggle — equal-width grid on mobile so both buttons
+              share the row evenly. */}
           <div className="grid grid-cols-2 gap-2 mb-5">
             <button
               onClick={() => setMode('paste')}
@@ -497,6 +500,7 @@ function PresentationPage() {
             </button>
           </div>
 
+          {/* Title hint — text-base on mobile prevents iOS auto-zoom. */}
           <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             🏷️ {t('presTitleOptional')}
           </label>
@@ -508,6 +512,7 @@ function PresentationPage() {
             className="w-full px-3 sm:px-4 py-2.5 border rounded-lg mb-4 text-base sm:text-sm"
           />
 
+          {/* Paste mode */}
           {mode === 'paste' && (
             <>
               <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
@@ -523,6 +528,7 @@ function PresentationPage() {
             </>
           )}
 
+          {/* Upload mode */}
           {mode === 'upload' && (
             <div className="mb-4">
               <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
@@ -564,6 +570,7 @@ function PresentationPage() {
             </div>
           )}
 
+          {/* Generate button */}
           <button
             onClick={handleGenerate}
             disabled={loading || !contentText.trim()}
@@ -573,6 +580,7 @@ function PresentationPage() {
           </button>
         </div>
 
+        {/* Tip box */}
         <div className="mt-4 sm:mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-3 sm:p-4">
           <h3 className="text-xs sm:text-sm font-bold text-gray-800 mb-1">
             💡 {t('presHowItWorks')}

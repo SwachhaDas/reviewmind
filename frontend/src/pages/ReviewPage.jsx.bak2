@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, REVIEW_ENDPOINTS, userHeaders, userJsonHeaders } from '../api'
+import { API_BASE, REVIEW_ENDPOINTS } from '../api'
 import PaperChat from '../components/PaperChat'
 import QuizGenerator from '../components/QuizGenerator'
 import ProgressTracker from '../components/ProgressTracker'
@@ -64,7 +64,7 @@ function ReviewPage() {
     try {
       const res = await fetch(REVIEW_ENDPOINTS.save, {
         method: 'POST',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           keyword: kw,
           criteria: cr,
@@ -90,9 +90,7 @@ function ReviewPage() {
   // ═══════════════════════════════════════════════
   const handleSelectSession = async (sessionId) => {
     try {
-      const res = await fetch(REVIEW_ENDPOINTS.session(sessionId), {
-        headers: userHeaders(),
-      })
+      const res = await fetch(REVIEW_ENDPOINTS.session(sessionId))
       const data = await res.json()
       if (data.status !== 'success') {
         setError(data.detail || 'Failed to load session')
@@ -257,7 +255,7 @@ function ReviewPage() {
         try {
           await fetch(REVIEW_ENDPOINTS.attachReport(currentSessionId), {
             method: 'POST',
-            headers: userJsonHeaders(),
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ report_filename: data.filename }),
           })
           setHistoryKey((k) => k + 1)

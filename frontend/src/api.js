@@ -11,6 +11,33 @@ export const API_BASE = (_ENV_BASE && _ENV_BASE.trim()) || 'http://localhost:800
 export const API_SERVER = API_BASE.replace(/\/api\/?$/, '')
 
 // ─────────────────────────────────────────────
+// User ID — per-browser identity for history isolation
+// ─────────────────────────────────────────────
+import { getUserId } from './userId'
+
+/**
+ * Build headers object with X-User-Id attached.
+ * Every history save/list/delete call MUST use this so the backend can
+ * isolate sessions per browser (no cross-user visibility).
+ */
+export function userHeaders(extra = {}) {
+  return {
+    "X-User-Id": getUserId(),
+    ...extra,
+  }
+}
+
+/**
+ * Convenience: userHeaders with JSON content-type.
+ */
+export function userJsonHeaders(extra = {}) {
+  return userHeaders({
+    "Content-Type": "application/json",
+    ...extra,
+  })
+}
+
+// ─────────────────────────────────────────────
 // Presentation API endpoints
 // ─────────────────────────────────────────────
 export const PRESENTATION_ENDPOINTS = {

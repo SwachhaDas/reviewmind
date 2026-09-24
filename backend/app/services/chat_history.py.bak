@@ -36,7 +36,7 @@ def list_sessions(user_id: str) -> list:
             "updated_at": s.get("updated_at") or s.get("created_at"),
             "message_count": len(s.get("messages", [])),
         })
-    summary.sort(key=lambda x: str(x.get("updated_at", "")), reverse=True)
+    summary.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
     return summary
 
 

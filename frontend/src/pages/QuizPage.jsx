@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE } from '../api'
+import { API_BASE, userHeaders, userJsonHeaders } from '../api'
 import QuizCard from '../components/QuizCard'
 import QuizResult from '../components/QuizResult'
 import QuizHistory from '../components/QuizHistory'
@@ -33,9 +33,6 @@ function QuizPage() {
 
   const fileInputRef = useRef(null)
 
-  // ─────────────────────────────────────────────
-  // On mount: reset to input view
-  // ─────────────────────────────────────────────
   useEffect(() => {
     setQuestions([])
     setAnswers([])
@@ -50,14 +47,14 @@ function QuizPage() {
     if (currentSessionId && answers.length > 0) {
       fetch(`${API_BASE}/quiz/history/${currentSessionId}/answers`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: userJsonHeaders(),
         body: JSON.stringify({ answers }),
       }).catch((err) => console.error('Auto-save failed:', err))
     }
   }, [answers, currentSessionId])
 
   // ─────────────────────────────────────────────
-  // PDF Upload handler
+  // PDF Upload handler (no user header needed — upload is user-agnostic)
   // ─────────────────────────────────────────────
   const handlePdfUpload = async (e) => {
     const file = e.target.files?.[0]
@@ -117,7 +114,7 @@ function QuizPage() {
     try {
       const res = await fetch(`${API_BASE}/quiz`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: userJsonHeaders(),
         body: JSON.stringify({
           context_text: contextText,
           num_questions: numQuestions,
@@ -188,7 +185,7 @@ function QuizPage() {
       try {
         await fetch(`${API_BASE}/quiz/history/${currentSessionId}/score`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: userJsonHeaders(),
           body: JSON.stringify({ correct: correctCount, total: total }),
         })
         setHistoryKey((k) => k + 1)
@@ -199,7 +196,7 @@ function QuizPage() {
   }
 
   // ─────────────────────────────────────────────
-  // Restart — go back to input view
+  // Restart
   // ─────────────────────────────────────────────
   const restartQuiz = () => {
     setQuestions([])
@@ -220,7 +217,9 @@ function QuizPage() {
   // ─────────────────────────────────────────────
   const handleSelectSession = async (sessionId) => {
     try {
-      const res = await fetch(`${API_BASE}/quiz/history/${sessionId}`)
+      const res = await fetch(`${API_BASE}/quiz/history/${sessionId}`, {
+        headers: userHeaders(),
+      })
       const session = await res.json()
 
       if (!session || !session.questions) {
@@ -290,7 +289,7 @@ function QuizPage() {
   )
 
   // ═══════════════════════════════════════════════
-  // VIEW 1: INPUT VIEW (no quiz started)
+  // VIEW 1: INPUT VIEW
   // ═══════════════════════════════════════════════
   if (questions.length === 0) {
     return (
@@ -330,7 +329,6 @@ function QuizPage() {
           )}
 
           <div className="bg-white border rounded-2xl p-4 sm:p-6 shadow-sm">
-            {/* Mode toggle — equal-width grid on mobile */}
             <div className="grid grid-cols-2 gap-2 mb-5">
               <button
                 onClick={() => setMode('paste')}
@@ -354,7 +352,6 @@ function QuizPage() {
               </button>
             </div>
 
-            {/* Paste mode — text-base on mobile prevents iOS auto-zoom */}
             {mode === 'paste' && (
               <>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
@@ -373,7 +370,6 @@ function QuizPage() {
               </>
             )}
 
-            {/* Upload mode */}
             {mode === 'upload' && (
               <div className="mb-4">
                 <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
@@ -403,7 +399,6 @@ function QuizPage() {
               </div>
             )}
 
-            {/* Number of questions — wraps on mobile if needed */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
               <label className="text-xs sm:text-sm font-semibold text-gray-700">
                 {t('quizNumQuestions')}:
@@ -425,7 +420,6 @@ function QuizPage() {
               </span>
             </div>
 
-            {/* Generate button */}
             <button
               onClick={startQuiz}
               disabled={loading || !contextText.trim()}
@@ -491,7 +485,6 @@ function QuizPage() {
 
   return (
     <div className="px-4 py-4 sm:px-6 sm:py-6 max-w-3xl mx-auto">
-      {/* Progress bar */}
       <div className="mb-4 sm:mb-6">
         <div className="flex justify-between text-xs text-gray-600 mb-2">
           <span>
@@ -511,7 +504,6 @@ function QuizPage() {
         </div>
       </div>
 
-      {/* Question card */}
       <QuizCard
         question={currentQuestion}
         index={currentIndex}
@@ -520,7 +512,6 @@ function QuizPage() {
         onSelect={handleAnswer}
       />
 
-      {/* Navigation — buttons share the row, thumb-friendly height on mobile */}
       <div className="mt-4 sm:mt-6 flex justify-between items-center gap-2">
         <button
           onClick={goPrev}

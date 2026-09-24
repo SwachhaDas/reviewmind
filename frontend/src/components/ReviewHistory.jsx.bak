@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { REVIEW_ENDPOINTS, userHeaders, userJsonHeaders } from '../api'
+import { REVIEW_ENDPOINTS } from '../api'
 
 /**
  * ReviewHistory — Sliding sidebar listing saved review sessions.
@@ -24,9 +24,7 @@ function ReviewHistory({ refreshKey, onSelectSession, activeSessionId }) {
   const fetchHistory = async () => {
     setLoading(true)
     try {
-      const res = await fetch(REVIEW_ENDPOINTS.list, {
-        headers: userHeaders(),
-      })
+      const res = await fetch(REVIEW_ENDPOINTS.list)
       const data = await res.json()
       if (data.status === 'success') {
         setItems(data.items || [])
@@ -45,10 +43,7 @@ function ReviewHistory({ refreshKey, onSelectSession, activeSessionId }) {
       return
     }
     try {
-      await fetch(REVIEW_ENDPOINTS.delete(id), {
-        method: 'DELETE',
-        headers: userHeaders(),
-      })
+      await fetch(REVIEW_ENDPOINTS.delete(id), { method: 'DELETE' })
       setItems((prev) => prev.filter((item) => item.id !== id))
     } catch (err) {
       console.error('[ReviewHistory] Delete failed:', err)
@@ -72,7 +67,7 @@ function ReviewHistory({ refreshKey, onSelectSession, activeSessionId }) {
     try {
       await fetch(REVIEW_ENDPOINTS.title(id), {
         method: 'PATCH',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: trimmed }),
       })
       // Update local list
@@ -87,30 +82,11 @@ function ReviewHistory({ refreshKey, onSelectSession, activeSessionId }) {
     }
   }
 
-  // ─── Format date nicely (handles string OR Unix timestamp number) ───
-  const formatDate = (value) => {
-    if (value === null || value === undefined || value === '') return ''
-
-    try {
-      // If it's a number (Unix timestamp in seconds) → convert to Date
-      if (typeof value === 'number') {
-        const d = new Date(value * 1000)
-        if (isNaN(d.getTime())) return ''
-        const pad = (n) => String(n).padStart(2, '0')
-        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-          d.getDate()
-        )} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-      }
-
-      // If it's already a string → slice to "YYYY-MM-DD HH:MM"
-      if (typeof value === 'string') {
-        return value.slice(0, 16)
-      }
-
-      return ''
-    } catch {
-      return ''
-    }
+  // ─── Format date nicely ───
+  const formatDate = (str) => {
+    if (!str) return ''
+    // str is "YYYY-MM-DD HH:MM:SS"
+    return str.slice(0, 16) // keep "YYYY-MM-DD HH:MM"
   }
 
   return (

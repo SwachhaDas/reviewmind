@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, userHeaders } from '../api'
+import { API_BASE } from '../api'
 import PaperUpload from '../components/PaperUpload'
 import PaperSections from '../components/PaperSections'
 import ChatBox from '../components/ChatBox'
@@ -33,9 +33,7 @@ function ChatPage() {
    */
   const handleSelectSession = async (sessionId) => {
     try {
-      const res = await fetch(`${API_BASE}/chat/history/${sessionId}`, {
-        headers: userHeaders(),
-      })
+      const res = await fetch(`${API_BASE}/chat/history/${sessionId}`)
       const session = await res.json()
 
       // Load paper data if present
@@ -101,7 +99,8 @@ function ChatPage() {
         </button>
       </div>
 
-      {/* Sliding history sidebar */}
+      {/* Sliding history sidebar — full-width on mobile, fixed 24rem
+          on sm+. Close button sized for comfortable tap on touch. */}
       <div
         className={`fixed top-0 right-0 h-screen w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
           showHistory ? 'translate-x-0' : 'translate-x-full'
@@ -138,7 +137,8 @@ function ChatPage() {
         />
       )}
 
-      {/* Main content */}
+      {/* Main content — single column on mobile (paper above chat),
+          two-panel layout on lg+ (paper left, chat right). */}
       {!paper ? (
         <div className="max-w-3xl mx-auto">
           <PaperUpload onPaperLoaded={handlePaperLoaded} />

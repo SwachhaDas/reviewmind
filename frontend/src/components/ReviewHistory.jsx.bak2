@@ -87,30 +87,11 @@ function ReviewHistory({ refreshKey, onSelectSession, activeSessionId }) {
     }
   }
 
-  // ─── Format date nicely (handles string OR Unix timestamp number) ───
-  const formatDate = (value) => {
-    if (value === null || value === undefined || value === '') return ''
-
-    try {
-      // If it's a number (Unix timestamp in seconds) → convert to Date
-      if (typeof value === 'number') {
-        const d = new Date(value * 1000)
-        if (isNaN(d.getTime())) return ''
-        const pad = (n) => String(n).padStart(2, '0')
-        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-          d.getDate()
-        )} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-      }
-
-      // If it's already a string → slice to "YYYY-MM-DD HH:MM"
-      if (typeof value === 'string') {
-        return value.slice(0, 16)
-      }
-
-      return ''
-    } catch {
-      return ''
-    }
+  // ─── Format date nicely ───
+  const formatDate = (str) => {
+    if (!str) return ''
+    // str is "YYYY-MM-DD HH:MM:SS"
+    return str.slice(0, 16) // keep "YYYY-MM-DD HH:MM"
   }
 
   return (

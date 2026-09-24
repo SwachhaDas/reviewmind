@@ -1,24 +1,24 @@
 """
 Review History Routes — CRUD endpoints for systematic review sessions.
 
-All endpoints require `X-User-Id` header (auto-set by frontend).
-
 Endpoints:
   POST   /api/review/history              — Save a completed pipeline
-  GET    /api/review/history              — List MY sessions
-  GET    /api/review/history/{id}         — Reload MY session
-  PATCH  /api/review/history/{id}/title   — Edit MY session title
-  DELETE /api/review/history/{id}         — Delete MY session
-  POST   /api/review/history/{id}/report  — Attach report filename
+  GET    /api/review/history              — List all sessions (sidebar)
+  GET    /api/review/history/{id}         — Reload a full session
+  PATCH  /api/review/history/{id}/title   — Edit session title
+  DELETE /api/review/history/{id}         — Delete a session
+  POST   /api/review/history/{id}/report  — Attach a report filename
 """
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services import review_history as history
 
 
+# NOTE: prefix is /review (NOT /api/review) because main.py
+# already adds prefix="/api" when registering this router.
 router = APIRouter(prefix="/review", tags=["review-history"])
 
 
@@ -41,31 +41,19 @@ class AttachReportRequest(BaseModel):
     report_filename: str
 
 
-def _require_user_id(x_user_id: str) -> str:
-    """Validate X-User-Id header."""
-    if not x_user_id or len(x_user_id) < 4:
-        raise HTTPException(
-            status_code=400,
-            detail="Missing or invalid X-User-Id header.",
-        )
-    return x_user_id
-
-
 # ═══════════════════════════════════════════════
 # ROUTE 1: Save a completed review
 # ═══════════════════════════════════════════════
 @router.post("/history")
-async def save_review(
-    req: SaveReviewRequest,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    user_id = _require_user_id(x_user_id)
-
+async def save_review(req: SaveReviewRequest):
+    """
+    Save a completed review pipeline to history.
+    Called automatically by the frontend after the pipeline finishes.
+    """
     if not req.papers:
         raise HTTPException(status_code=400, detail="No papers to save")
 
     session = history.create_session(
-        user_id=user_id,
         keyword=req.keyword,
         criteria=req.criteria,
         lang=req.lang,
@@ -77,41 +65,36 @@ async def save_review(
 
     return {
         'status': 'success',
-        'session_id': session['session_id'],
+        'session_id': session['id'],
         'title': session['title'],
-        'created_at': session.get('created_at_str') or session.get('created_at'),
+        'created_at': session['created_at'],
     }
 
 
 # ═══════════════════════════════════════════════
-# ROUTE 2: List my sessions
+# ROUTE 2: List all sessions (lightweight)
 # ═══════════════════════════════════════════════
 @router.get("/history")
-async def list_reviews(
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    user_id = _require_user_id(x_user_id)
-    items = history.list_sessions(user_id)
+async def list_reviews():
+    """Return a lightweight list for the sidebar."""
+    items = history.list_sessions()
     return {'status': 'success', 'items': items}
 
 
 # ═══════════════════════════════════════════════
-# ROUTE 3: Reload one session
+# ROUTE 3: Reload a full session
 # ═══════════════════════════════════════════════
 @router.get("/history/{session_id}")
-async def get_review(
-    session_id: str,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    user_id = _require_user_id(x_user_id)
-    session = history.get_session(user_id, session_id)
+async def get_review(session_id: str):
+    """Reload a full saved review session (papers + counts + report)."""
+    session = history.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
     return {
         'status': 'success',
-        'session_id': session['session_id'],
-        'title': session.get('title', 'Untitled'),
+        'session_id': session['id'],
+        'title': session['title'],
         'keyword': session.get('keyword', ''),
         'criteria': session.get('criteria', ''),
         'language': session.get('language', 'en'),
@@ -119,8 +102,8 @@ async def get_review(
         'duplicates_removed': session.get('duplicates_removed', 0),
         'counts': session.get('counts', {}),
         'report_filename': session.get('report_filename'),
-        'created_at': session.get('created_at_str') or session.get('created_at'),
-        'updated_at': session.get('created_at_str') or session.get('created_at'),
+        'created_at': session.get('created_at'),
+        'updated_at': session.get('updated_at'),
     }
 
 
@@ -128,39 +111,30 @@ async def get_review(
 # ROUTE 4: Edit title
 # ═══════════════════════════════════════════════
 @router.patch("/history/{session_id}/title")
-async def edit_title(
-    session_id: str,
-    req: TitleUpdateRequest,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    user_id = _require_user_id(x_user_id)
-    session = history.get_session(user_id, session_id)
+async def edit_title(session_id: str, req: TitleUpdateRequest):
+    """Update the title of a saved session."""
+    session = history.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    updated = history.update_title(user_id, session_id, req.title)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Session not found")
-    return {'status': 'success', 'title': updated.get('title', '')}
+    updated = history.update_title(session_id, req.title)
+    return {'status': 'success', 'title': updated['title']}
 
 
 # ═══════════════════════════════════════════════
-# ROUTE 5: Attach a report
+# ROUTE 5: Attach a report filename to a session
 # ═══════════════════════════════════════════════
 @router.post("/history/{session_id}/report")
-async def attach_report(
-    session_id: str,
-    req: AttachReportRequest,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    user_id = _require_user_id(x_user_id)
-    session = history.get_session(user_id, session_id)
+async def attach_report(session_id: str, req: AttachReportRequest):
+    """
+    Attach a generated Word report filename to a session.
+    Called by the frontend after /api/report succeeds.
+    """
+    session = history.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    ok = history.attach_report(user_id, session_id, req.report_filename)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Session not found")
+    history.attach_report(session_id, req.report_filename)
     return {'status': 'success', 'report_filename': req.report_filename}
 
 
@@ -168,14 +142,11 @@ async def attach_report(
 # ROUTE 6: Delete a session
 # ═══════════════════════════════════════════════
 @router.delete("/history/{session_id}")
-async def delete_review(
-    session_id: str,
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    user_id = _require_user_id(x_user_id)
-    session = history.get_session(user_id, session_id)
+async def delete_review(session_id: str):
+    """Delete a saved review session."""
+    session = history.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    history.delete_session(user_id, session_id)
+    history.delete_session(session_id)
     return {'status': 'success', 'deleted': session_id}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { API_BASE, userHeaders, userJsonHeaders } from '../api'
+import { API_BASE } from '../api'
 
 /**
  * QuizHistory — sidebar with all past quiz sessions.
@@ -17,9 +17,7 @@ function QuizHistory({ refreshKey, onSelectSession }) {
   const fetchHistory = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/quiz/history`, {
-        headers: userHeaders(),
-      })
+      const res = await fetch(`${API_BASE}/quiz/history`)
       const data = await res.json()
       setSessions(data.sessions || [])
     } catch (err) {
@@ -37,10 +35,7 @@ function QuizHistory({ refreshKey, onSelectSession }) {
     e.stopPropagation()
     if (!window.confirm('Delete this quiz session?')) return
     try {
-      await fetch(`${API_BASE}/quiz/history/${sessionId}`, {
-        method: 'DELETE',
-        headers: userHeaders(),
-      })
+      await fetch(`${API_BASE}/quiz/history/${sessionId}`, { method: 'DELETE' })
       setSessions((prev) => prev.filter((s) => s.id !== sessionId))
       if (activeId === sessionId) setActiveId(null)
     } catch (err) {
@@ -52,10 +47,7 @@ function QuizHistory({ refreshKey, onSelectSession }) {
     if (sessions.length === 0) return
     if (!window.confirm(`Delete all ${sessions.length} quiz sessions?`)) return
     try {
-      await fetch(`${API_BASE}/quiz/history`, {
-        method: 'DELETE',
-        headers: userHeaders(),
-      })
+      await fetch(`${API_BASE}/quiz/history`, { method: 'DELETE' })
       setSessions([])
       setActiveId(null)
     } catch (err) {
@@ -88,7 +80,7 @@ function QuizHistory({ refreshKey, onSelectSession }) {
     try {
       await fetch(`${API_BASE}/quiz/history/${sessionId}/title`, {
         method: 'PATCH',
-        headers: userJsonHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: newTitle }),
       })
       setSessions((prev) =>

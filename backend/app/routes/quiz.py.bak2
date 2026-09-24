@@ -45,7 +45,7 @@ class TitleUpdateRequest(BaseModel):
 
 
 def _require_user_id(x_user_id: str) -> str:
-    if not x_user_id or len(x_user_id) < 4:
+    if not x_user_id or len(x_user_id) < 8:
         raise HTTPException(
             status_code=400,
             detail="Missing or invalid X-User-Id header.",
