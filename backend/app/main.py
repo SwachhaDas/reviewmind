@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from app.routes import chat, extract, pipeline, quiz, report, screen, search, upload
 from app.routes import presentation
@@ -8,12 +9,23 @@ from app.routes import stats  # ← NEW
 
 app = FastAPI(title="ReviewMind API")
 
+# ─── CORS setup ───
+# Local dev origins are always allowed. In production, the deployed
+# frontend URL is supplied via the FRONTEND_URL environment variable
+# (set on Render). allow_origin_regex covers Netlify preview URLs.
+_local_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+_prod_origin = os.getenv("FRONTEND_URL", "").strip()
+_allow_origins = _local_origins + ([_prod_origin] if _prod_origin else [])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=_allow_origins,
+    # Matches Netlify deploy-preview subdomains (e.g. *.netlify.app)
+    # and any https domain passed in FRONTEND_URL.
+    allow_origin_regex=r"https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
