@@ -26,6 +26,7 @@ matplotlib
 
 # PDF processing
 PyMuPDF
+pypdf
 pdfminer.six
 pdfplumber
 
